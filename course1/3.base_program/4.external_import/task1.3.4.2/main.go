@@ -2,18 +2,46 @@ package main
 
 import (
 	"fmt"
-	"math"
+
+	"github.com/ksrof/gocolors"
 )
 
 func main() {
-	fmt.Println(Sin(90))
-	fmt.Println(Cos(90))
+	fmt.Println(ColorizeRed("Hello World!"))
+	fmt.Println(ColorizeGreen("Hello World!"))
+	fmt.Println(ColorizeBlue("Hello World!"))
+	fmt.Println(ColorizeYellow("Hello World!"))
+	fmt.Println(ColorizeMagenta("Hello World!"))
+	fmt.Println(ColorizeCyan("Hello World!"))
+	fmt.Println(ColorizeWhite("Hello World!"))
+
 }
 
-func Sin(x float64) float64 {
-	return math.Sin(x)
+func ColorizeRed(a string) string {
+	return gocolors.Red(a, "")
 }
 
-func Cos(x float64) float64 {
-	return math.Cos(x)
+func ColorizeGreen(a string) string {
+
+	return gocolors.Green(a, "")
+}
+
+func ColorizeBlue(a string) string {
+	return gocolors.Blue(a, "")
+}
+
+func ColorizeYellow(a string) string {
+
+	return gocolors.Yellow(a, "")
+}
+func ColorizeMagenta(a string) string {
+	return gocolors.Magenta(a, "")
+}
+
+func ColorizeCyan(a string) string {
+
+	return gocolors.Cyan(a, "")
+}
+func ColorizeWhite(a string) string {
+	return gocolors.White(a, "")
 }

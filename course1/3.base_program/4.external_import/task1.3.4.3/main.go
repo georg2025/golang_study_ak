@@ -2,18 +2,18 @@ package main
 
 import (
 	"fmt"
-	"math"
+
+	"github.com/icrowley/fake"
 )
 
 func main() {
-	fmt.Println(Sin(90))
-	fmt.Println(Cos(90))
+	fmt.Println(GenerateFakeData())
 }
 
-func Sin(x float64) float64 {
-	return math.Sin(x)
-}
-
-func Cos(x float64) float64 {
-	return math.Cos(x)
+func GenerateFakeData() string {
+	fakename := fake.FullName()
+	fakeadress := fake.StreetAddress()
+	fakephone := fake.Phone()
+	fakemail := fake.EmailAddress()
+	return fmt.Sprint("Name: ", fakename, "\nAddress: ", fakeadress, "\nPhone: ", fakephone, "\nEmail: ", fakemail)
 }
