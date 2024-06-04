@@ -14,6 +14,7 @@ func main() {
 	fmt.Println(ColorizeMagenta("Hello World!"))
 	fmt.Println(ColorizeCyan("Hello World!"))
 	fmt.Println(ColorizeWhite("Hello World!"))
+	fmt.Println(ColorizeCustom("Hello World!", 100, 255, 50))
 
 }
 
@@ -44,4 +45,8 @@ func ColorizeCyan(a string) string {
 }
 func ColorizeWhite(a string) string {
 	return gocolors.White(a, "")
+}
+
+func ColorizeCustom(a string, r, g, b uint8) string {
+	return fmt.Sprintf("\x1b[38;2;%d;%d;%dm%s\x1b[0m", r, g, b, a)
 }
