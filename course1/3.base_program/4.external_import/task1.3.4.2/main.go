@@ -1,12 +1,9 @@
-// This library was supposed to be written full with gocolors lib. Unfortunately, it is unable
-// to make RGB color with this lib, so, it was made manually with the help of fmt.Sprintf
-
 package main
 
 import (
 	"fmt"
 
-	"github.com/ksrof/gocolors"
+	"github.com/mewzax/gocolors"
 )
 
 func main() {
@@ -17,39 +14,42 @@ func main() {
 	fmt.Println(ColorizeMagenta("Hello World!"))
 	fmt.Println(ColorizeCyan("Hello World!"))
 	fmt.Println(ColorizeWhite("Hello World!"))
-	fmt.Println(ColorizeCustom("Hello World!", 100, 255, 50))
+	fmt.Println(ColorizeCustom("Hello World!", 255, 50, 50))
 
 }
 
 func ColorizeRed(a string) string {
-	return gocolors.Red(a, "")
+	return gocolors.Colorize(gocolors.Red, a)
 }
 
 func ColorizeGreen(a string) string {
 
-	return gocolors.Green(a, "")
+	return gocolors.Colorize(gocolors.Green, a)
 }
 
 func ColorizeBlue(a string) string {
-	return gocolors.Blue(a, "")
+	return gocolors.Colorize(gocolors.Blue, a)
 }
 
 func ColorizeYellow(a string) string {
 
-	return gocolors.Yellow(a, "")
+	return gocolors.Colorize(gocolors.Yellow, a)
 }
+
 func ColorizeMagenta(a string) string {
-	return gocolors.Magenta(a, "")
+	return gocolors.Colorize(gocolors.Magenta, a)
 }
 
 func ColorizeCyan(a string) string {
 
-	return gocolors.Cyan(a, "")
+	return gocolors.Colorize(gocolors.Cyan, a)
 }
+
 func ColorizeWhite(a string) string {
-	return gocolors.White(a, "")
+	return gocolors.Colorize(gocolors.White, a)
 }
 
 func ColorizeCustom(a string, r, g, b uint8) string {
-	return fmt.Sprintf("\x1b[38;2;%d;%d;%dm%s\x1b[0m", r, g, b, a)
+
+	return gocolors.Colorize(gocolors.RGB(int(r), int(g), int(b)), a)
 }
