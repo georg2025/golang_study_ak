@@ -1,3 +1,6 @@
+// This library was supposed to be written full with gocolors lib. Unfortunately, it is unable
+// to make RGB color with this lib, so, it was made manually with the help of fmt.Sprintf
+
 package main
 
 import (
