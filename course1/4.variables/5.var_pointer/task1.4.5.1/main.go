@@ -5,17 +5,16 @@ import "fmt"
 func main() {
 	number := 11
 	changeInt(&number)
-	floatnumber := 1.3
-	changeFloat(&floatnumber)
-	ourstring := "Hello, world!"
-	changeString(&ourstring)
-	ourbool := true
-	changeBool(&ourbool)
+	floatNumber := 1.3
+	changeFloat(&floatNumber)
+	ourString := "Hello, world!"
+	changeString(&ourString)
+	ourBool := true
+	changeBool(&ourBool)
 	fmt.Println(number)
-	fmt.Println(floatnumber)
-	fmt.Println(ourstring)
-	fmt.Println(ourbool)
-
+	fmt.Println(floatNumber)
+	fmt.Println(ourString)
+	fmt.Println(ourBool)
 }
 
 func changeInt(a *int) {

@@ -25,5 +25,4 @@ func ReverseString(str *string) {
 		builder.WriteString(letters[i])
 	}
 	*str = builder.String()
-
 }

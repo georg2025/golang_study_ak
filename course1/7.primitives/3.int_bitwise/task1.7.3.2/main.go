@@ -8,53 +8,61 @@ func main() {
 }
 
 func getFilePermissions(flag int) string {
-	Ownerrights := flag / 100
-	helpbit := 1
-	ownerexecute := "-"
-	if Ownerrights&helpbit != 0 {
-		ownerexecute = "Execute"
-	}
-	helpbit = helpbit << 1
-	ownerwrite := "-"
-	if Ownerrights&helpbit != 0 {
-		ownerwrite = "Write"
-	}
-	helpbit = helpbit << 1
-	ownerread := "-"
-	if Ownerrights&helpbit != 0 {
-		ownerread = "Read"
-	}
-	Grouprights := flag % 100 / 10
-	groupread := "-"
-	if Grouprights&helpbit != 0 {
-		groupread = "Read"
-	}
-	helpbit = helpbit >> 1
-	groupwrite := "-"
-	if Grouprights&helpbit != 0 {
-		groupwrite = "Write"
-	}
-	helpbit = helpbit >> 1
-	groupexecute := "-"
-	if Grouprights&helpbit != 0 {
-		groupexecute = "Execute"
-	}
-	Otherrights := flag % 10
-	otherexecute := "-"
-	if Otherrights&helpbit != 0 {
-		otherexecute = "Execute"
-	}
-	helpbit = helpbit << 1
-	otherwrite := "-"
-	if Otherrights&helpbit != 0 {
-		otherwrite = "Write"
-	}
-	helpbit = helpbit << 1
-	otherread := "-"
-	if Otherrights&helpbit != 0 {
-		otherread = "Read"
+	OwnerRights := flag / 100
+	helpBit := 1
+	ownerExecute := "-"
+	if OwnerRights&helpBit != 0 {
+		ownerExecute = "Execute"
 	}
 
-	return fmt.Sprintf("Owner:%s,%s,%s Group:%s,%s,%s Other:%s,%s,%s", ownerread, ownerwrite, ownerexecute, groupread,
-		groupwrite, groupexecute, otherread, otherwrite, otherexecute)
+	helpBit = helpBit << 1
+	ownerWrite := "-"
+	if OwnerRights&helpBit != 0 {
+		ownerWrite = "Write"
+	}
+
+	helpBit = helpBit << 1
+	ownerRead := "-"
+	if OwnerRights&helpBit != 0 {
+		ownerRead = "Read"
+	}
+
+	GroupRights := flag % 100 / 10
+	groupRead := "-"
+	if GroupRights&helpBit != 0 {
+		groupRead = "Read"
+	}
+
+	helpBit = helpBit >> 1
+	groupWrite := "-"
+	if GroupRights&helpBit != 0 {
+		groupWrite = "Write"
+	}
+
+	helpBit = helpBit >> 1
+	groupExecute := "-"
+	if GroupRights&helpBit != 0 {
+		groupExecute = "Execute"
+	}
+
+	OtherRights := flag % 10
+	otherExecute := "-"
+	if OtherRights&helpBit != 0 {
+		otherExecute = "Execute"
+	}
+
+	helpBit = helpBit << 1
+	otherWrite := "-"
+	if OtherRights&helpBit != 0 {
+		otherWrite = "Write"
+	}
+
+	helpBit = helpBit << 1
+	otherRead := "-"
+	if OtherRights&helpBit != 0 {
+		otherRead = "Read"
+	}
+
+	return fmt.Sprintf("Owner:%s,%s,%s Group:%s,%s,%s Other:%s,%s,%s", ownerRead, ownerWrite, ownerExecute, groupRead,
+		groupWrite, groupExecute, otherRead, otherWrite, otherExecute)
 }

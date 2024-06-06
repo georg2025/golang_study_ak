@@ -6,6 +6,7 @@ func main() {
 	var name string
 	var age int
 	var city string
+
 	fmt.Print("Введите ваше имя: ")
 	_, err := fmt.Scanln(&name)
 	if err != nil {

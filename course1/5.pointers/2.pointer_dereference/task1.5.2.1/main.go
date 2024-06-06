@@ -11,7 +11,6 @@ func main() {
 	fmt.Println(y)
 	f := Sum(&t, &m)
 	fmt.Println(f)
-
 }
 
 func Dereference(n *int) int {

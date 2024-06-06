@@ -11,9 +11,9 @@ func main() {
 }
 
 func GenerateFakeData() string {
-	fakename := fake.FullName()
-	fakeadress := fake.StreetAddress()
-	fakephone := fake.Phone()
-	fakemail := fake.EmailAddress()
-	return fmt.Sprint("Name: ", fakename, "\nAddress: ", fakeadress, "\nPhone: ", fakephone, "\nEmail: ", fakemail)
+	fakeName := fake.FullName()
+	fakeAdress := fake.StreetAddress()
+	fakePhone := fake.Phone()
+	fakeMail := fake.EmailAddress()
+	return fmt.Sprint("Name: ", fakeName, "\nAddress: ", fakeAdress, "\nPhone: ", fakePhone, "\nEmail: ", fakeMail)
 }
