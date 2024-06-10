@@ -8,5 +8,6 @@ func InsertAfterIDX(xs []int, idx int, x ...int) []int {
 		return []int{}
 	}
 
-	return append(xs[:idx+1], x...)
+	xs = append(xs[:idx+1], x...)
+	return xs
 }

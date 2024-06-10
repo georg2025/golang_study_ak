@@ -3,9 +3,10 @@ package main
 func main() {
 }
 
-func Cut(x []int, start, end int) []int {
-	if len(x) == 0 || start > end || start < 0 || end >= len(x) {
+func Cut(xs []int, start, end int) []int {
+	if len(xs) == 0 || start > end || start < 0 || end >= len(xs) {
 		return []int{}
 	}
-	return x[start : end+1]
+	newSlice := xs[start : end+1]
+	return newSlice
 }

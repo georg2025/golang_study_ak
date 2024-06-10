@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestInsertAfterIDX(t *testing.T) {
+func TestRemoveExtraMemory(t *testing.T) {
 	testSlice := make([]int, 3, 6)
 	result := cap(RemoveExtraMemory(testSlice))
 	if result != 3 {
