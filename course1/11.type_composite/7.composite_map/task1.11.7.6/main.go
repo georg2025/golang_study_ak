@@ -14,10 +14,9 @@ func filterWords(text string, censorMap map[string]string) string {
 	}
 
 	sentences := splitSentences(text)
-	var answer strings.Builder
-	var sb strings.Builder
-	words := strings.Fields(sentences[0])
 
+	words := strings.Fields(sentences[0])
+	passedWords := []string{}
 	uniqueWords := make(map[string]bool)
 
 	for _, i := range words {
@@ -27,21 +26,19 @@ func filterWords(text string, censorMap map[string]string) string {
 		}
 		_, ok = uniqueWords[strings.ToLower(i)]
 		if !ok {
-			sb.WriteString(i)
-			sb.WriteString(" ")
+			passedWords = append(passedWords, i)
 			uniqueWords[strings.ToLower(i)] = true
 		}
 	}
 
-	answer.WriteString(strings.Trim(sb.String(), " "))
-	answer.WriteString("! ")
+	answer := strings.Join(passedWords, " ") + "!"
 	if len(sentences) > 1 {
 		for i := 1; i < len(sentences); i++ {
-			answer.WriteString(filterWords(WordsToSentence(strings.Fields(sentences[i])), censorMap))
+			answer = answer + " " + (filterWords(WordsToSentence(strings.Fields(sentences[i])), censorMap))
 		}
 	}
 
-	return answer.String()
+	return strings.Trim(answer, " ")
 }
 
 func WordsToSentence(words []string) string {
@@ -73,12 +70,13 @@ func checkUpper(old, new string) string {
 
 func splitSentences(message string) []string {
 	originSentences := strings.Split(message, "!")
+	if len(originSentences) == 2 && originSentences[1] == "" {
+		return []string{originSentences[0]}
+	}
 	var orphan string
 	var sentences []string
-
 	for i, sentence := range originSentences {
 		words := strings.Split(sentence, " ")
-
 		if len(words) == 1 {
 			if len(orphan) > 0 {
 				orphan += " "
@@ -87,12 +85,10 @@ func splitSentences(message string) []string {
 			orphan += words[0] + "!"
 			continue
 		}
-
 		if orphan != "" {
 			originSentences[i] = strings.Join([]string{orphan, " ", sentence}, " ") + "!"
 			orphan = ""
 		}
-
 		sentences = append(sentences, originSentences[i])
 	}
 	return sentences
