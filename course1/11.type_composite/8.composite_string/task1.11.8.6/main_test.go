@@ -20,4 +20,14 @@ func TestCountVowels(t *testing.T) {
 	if result != expected {
 		t.Errorf("Got %d, expected %d", result, expected)
 	}
+	result = CountVowels("Птчк т прнс?")
+	expected = 0
+	if result != expected {
+		t.Errorf("Got %d, expected %d", result, expected)
+	}
+	result = CountVowels("АаааааААААа")
+	expected = 11
+	if result != expected {
+		t.Errorf("Got %d, expected %d", result, expected)
+	}
 }
