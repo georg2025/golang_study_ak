@@ -3,15 +3,21 @@ package main
 import (
 	"math/rand"
 	"strings"
+	"time"
 )
 
 func main() {
 }
 
-func GenerateActivationKey() string {
+// 255 - test mode. Everything else - normal mode
+func GenerateActivationKey(mode uint8) string {
 	letters := []string{}
 	for i := 0; i < 4; i++ {
-		letters = append(letters, string(GenerateRandomChars(100)))
+		if mode == 255 {
+			letters = append(letters, string(GenerateRandomChars(100)))
+		} else {
+			letters = append(letters, string(GenerateRandomChars(time.Now().UTC().UnixNano())))
+		}
 	}
 
 	return strings.Join(letters, "-")
