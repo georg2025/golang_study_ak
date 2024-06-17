@@ -18,7 +18,7 @@ func main() {
 
 func getUsersFromJSON(data []byte) ([]User, error) {
 	if len(data) == 0 {
-		return nil, nil
+		return []User{}, nil
 	}
 	users := []User{}
 	err := json.Unmarshal(data, &users)

@@ -1,24 +1,10 @@
 package main
 
 import (
-	"fmt"
-
 	yaml "gopkg.in/yaml.v2"
 )
 
 func main() {
-	data := `server: 
- port: "60"
-db:
- host: 127.0.0.1
- port: "60"
- user: Ivanov
- password: Petrov`
-	config, err := getConfigFromYAML([]byte(data))
-	if err != nil {
-		fmt.Println("we got error:", err)
-	}
-	fmt.Println(config)
 }
 
 type Config struct {
