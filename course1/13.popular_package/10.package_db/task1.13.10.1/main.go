@@ -8,19 +8,6 @@ import (
 )
 
 func main() {
-	err := CreateUserTable()
-	if err != nil {
-		fmt.Println("Error with User Table creating:", err)
-	}
-	user := User{ID: 1, Name: "Mary", Age: 22}
-	InsertUser(user)
-	fmt.Println(SelectUser(1))
-	user2 := User{ID: 1, Name: "Mary", Age: 23}
-	err = UpdateUser(user2)
-	if err != nil {
-		fmt.Println("Error with users updating:", err)
-	}
-	fmt.Println(SelectUser(1))
 }
 
 type User struct {
