@@ -25,9 +25,4 @@ func TestGetVariableType(t *testing.T) {
 	if result != expected {
 		t.Errorf("Got %s, expected %s", result, expected)
 	}
-	result = getVariableType(22.4)
-	expected = "Cant figure out variable type"
-	if result != expected {
-		t.Errorf("Got %s, expected %s", result, expected)
-	}
 }

@@ -5,7 +5,7 @@ func main() {
 
 func getType(i interface{}) string {
 	if i == nil {
-		return "Пустой интерфейс"
+		return "Empty interface"
 	}
 	answer := ""
 	switch i.(type) {

@@ -14,23 +14,23 @@ func TestCensorAds(t *testing.T) {
 	censor["велосипед merida"] = "Телефон Apple"
 	ads := []Ad{
 		{
-			Title:    "HelLo moo",
-			Описание: "Its a страйк moo",
+			Title:       "HelLo moo",
+			Discription: "Its a страйк moo",
 		},
 		{
-			Title:    "ВеЛоСиПед merida",
-			Описание: "Продаю MACbook pro",
+			Title:       "ВеЛоСиПед merida",
+			Discription: "Продаю MACbook pro",
 		},
 	}
 	result := censorAds(ads, censor)
 	expected := []Ad{
 		{
-			Title:    "Hello Forward",
-			Описание: "Its a Strike Forward",
+			Title:       "Hello Forward",
+			Discription: "Its a Strike Forward",
 		},
 		{
-			Title:    "Телефон Apple",
-			Описание: "Продаю Macbook Pro",
+			Title:       "Телефон Apple",
+			Discription: "Продаю Macbook Pro",
 		},
 	}
 	if !reflect.DeepEqual(result, expected) {

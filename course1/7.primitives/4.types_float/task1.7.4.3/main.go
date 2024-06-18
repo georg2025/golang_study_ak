@@ -10,9 +10,9 @@ func main() {
 }
 
 func CompareRoundedValues(a, b float64, decimalPlaces int) (isEqual bool, difference float64) {
-	helpNumber := float64(math.Pow10(decimalPlaces))
-	newA := (math.Round(a * helpNumber)) / helpNumber
-	newB := (math.Round(b * helpNumber)) / helpNumber
+	tenPowDecimalPlaces := float64(math.Pow10(decimalPlaces))
+	newA := (math.Round(a * tenPowDecimalPlaces)) / tenPowDecimalPlaces
+	newB := (math.Round(b * tenPowDecimalPlaces)) / tenPowDecimalPlaces
 	if newA == newB {
 		return true, 0.0
 	}

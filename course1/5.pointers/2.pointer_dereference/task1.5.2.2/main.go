@@ -42,6 +42,7 @@ func CountOccurrences(numbers *[]int, target *int) int {
 	if len(*numbers) == 0 {
 		return answer
 	}
+
 	for i := 0; i < len(*numbers); i++ {
 		if (*numbers)[i] == *target {
 			answer += 1

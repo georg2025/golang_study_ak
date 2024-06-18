@@ -37,17 +37,16 @@ func Max(numbers []int) *int {
 }
 
 func IsPrime(number int) *bool {
-	var answer *bool = new(bool)
-	*answer = big.NewInt(int64(number)).ProbablyPrime(0)
-	return answer
+	answer := big.NewInt(int64(number)).ProbablyPrime(0)
+	return &answer
 }
 
 func ConcatenateStrings(strs []string) *string {
-	var answer *string = new(string)
 	builder := &strings.Builder{}
 	for _, i := range strs {
 		builder.WriteString(i)
 	}
+	var answer *string = new(string)
 	*answer = builder.String()
 	return answer
 }

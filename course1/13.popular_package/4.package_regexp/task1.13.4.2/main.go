@@ -9,8 +9,8 @@ func main() {
 }
 
 type Ad struct {
-	Title    string
-	Описание string
+	Title       string
+	Discription string
 }
 
 func censorAds(ads []Ad, censor map[string]string) []Ad {
@@ -23,9 +23,9 @@ func censorAds(ads []Ad, censor map[string]string) []Ad {
 	answer := []Ad{}
 	for _, i := range ads {
 		outputTitle := re.ReplaceAllStringFunc(i.Title, replacer)
-		outputText := re.ReplaceAllStringFunc(i.Описание, replacer)
+		outputText := re.ReplaceAllStringFunc(i.Discription, replacer)
 		i.Title = outputTitle
-		i.Описание = outputText
+		i.Discription = outputText
 		answer = append(answer, i)
 	}
 	return answer

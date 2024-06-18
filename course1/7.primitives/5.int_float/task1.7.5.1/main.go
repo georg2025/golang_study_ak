@@ -12,14 +12,14 @@ func main() {
 
 func binaryStringToFloat(binary string) float32 {
 	var number uint32
-	var helpNumber uint32 = 1
+	var checkingBit uint32 = 1
 	numbersSlice := strings.Split(binary, "")
 
 	for i := len(numbersSlice) - 1; i >= 0; i-- {
 		if numbersSlice[i] == "1" {
-			number = number | helpNumber
+			number = number | checkingBit
 		}
-		helpNumber = helpNumber << 1
+		checkingBit = checkingBit << 1
 	}
 
 	return *(*float32)(unsafe.Pointer(&number))

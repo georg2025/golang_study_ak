@@ -8,8 +8,14 @@ func main() {
 func Concat(xs ...interface{}) interface{} {
 	var sb strings.Builder
 	for _, i := range xs {
-		j := i.(string)
-		sb.WriteString(j)
+		switch i := i.(type) {
+		case string:
+			if len(i) > 0 {
+				sb.WriteString(i)
+			}
+		default:
+			continue
+		}
 	}
 	return sb.String()
 }
@@ -17,8 +23,12 @@ func Concat(xs ...interface{}) interface{} {
 func Sum(xs ...interface{}) interface{} {
 	answer := 0
 	for _, i := range xs {
-		j := i.(int)
-		answer += j
+		switch i := i.(type) {
+		case int:
+			answer += i
+		default:
+			continue
+		}
 	}
 	return answer
 }

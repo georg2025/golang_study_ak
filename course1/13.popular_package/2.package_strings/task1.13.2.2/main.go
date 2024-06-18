@@ -21,7 +21,7 @@ func FilterComments(users []User) []User {
 	for _, i := range users {
 		newComments := []Comment{}
 		for _, j := range i.Comments {
-			if !IsBadComments(j.Message) {
+			if !IsBadComment(j.Message) {
 				newComments = append(newComments, j)
 			}
 		}
@@ -31,7 +31,7 @@ func FilterComments(users []User) []User {
 	return newUsers
 }
 
-func IsBadComments(comment string) bool {
+func IsBadComment(comment string) bool {
 	return strings.Contains(strings.ToLower(comment), "bad comment")
 }
 

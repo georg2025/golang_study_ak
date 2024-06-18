@@ -22,7 +22,7 @@ func main() {
 	defer file.Close()
 	err = WriteFile(strings.NewReader("Hello, World!"), file)
 	if err != nil {
-		fmt.Println("Ошибка при записи файла:", err)
+		fmt.Println("error with writing on file:", err)
 	}
 }
 
