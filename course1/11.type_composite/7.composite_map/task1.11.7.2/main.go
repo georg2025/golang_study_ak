@@ -15,7 +15,8 @@ func main() {
 
 func mergeMaps(map1, map2 map[string]int) map[string]int {
 	for i, j := range map2 {
-		map1[i] = j
+		map1[i] += j
 	}
+
 	return map1
 }

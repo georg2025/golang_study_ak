@@ -10,15 +10,16 @@ type User struct {
 }
 
 func getUniqueUsers(users []User) []User {
-	usersMap := make(map[string]bool)
+	usersMap := make(map[string]struct{}, len(users))
 	uniqueUsers := []User{}
+
 	for _, i := range users {
-		if !usersMap[i.Nickname] {
+		_, ok := usersMap[i.Nickname]
+		if !ok {
 			uniqueUsers = append(uniqueUsers, i)
-			usersMap[i.Nickname] = true
+			usersMap[i.Nickname] = struct{}{}
 		}
 	}
-	answer := make([]User, len(uniqueUsers))
-	copy(answer, uniqueUsers)
-	return answer
+
+	return uniqueUsers
 }

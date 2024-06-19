@@ -7,14 +7,14 @@ import (
 func main() {
 }
 
-func ReplaceSymbols(text string, badchar, goodchar rune) string {
+func ReplaceSymbols(text string, oldChar, newChar rune) string {
 	if len(text) == 0 {
 		return ""
 	}
 	var sb strings.Builder
 	for _, ch := range text {
-		if ch == badchar {
-			ch = goodchar
+		if ch == oldChar {
+			ch = newChar
 		}
 		sb.WriteRune(ch)
 	}

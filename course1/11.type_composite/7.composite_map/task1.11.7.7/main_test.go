@@ -12,6 +12,7 @@ func TestGetUniqueUsers(t *testing.T) {
 	users := []User{user1, user2, user3}
 	result := getUniqueUsers(users)
 	expected := []User{user1, user2}
+
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Got %v, expected %v", result, expected)
 	}
