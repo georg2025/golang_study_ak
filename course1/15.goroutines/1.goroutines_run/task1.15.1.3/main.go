@@ -38,29 +38,45 @@ type queue struct {
 
 func main() {
 	newQueue := queue{Head: nil, Tail: nil}
+	lastNumberNeeded := 100
 
-	for i := 1; i <= 100; i++ {
+	for i := 1; i <= lastNumberNeeded; i++ {
 		addTask(i, &newQueue)
 	}
 
 	var wg sync.WaitGroup
+	ch := make(chan int)
 
-	for {
-		currentTask, stillHaveTasks := takeTask(&newQueue)
-		if !stillHaveTasks {
-			break
+	go func() {
+		defer close(ch)
+
+		for {
+			if newQueue.Head == nil {
+				break
+			}
+
+			currentTask, stillHaveTasks := takeTask(&newQueue)
+			wg.Add(1)
+			go work(&currentTask, &wg, ch)
+
+			if !stillHaveTasks {
+				break
+			}
 		}
-		wg.Add(1)
-		go work(&currentTask, &wg)
+		wg.Wait()
+	}()
+
+	var answer int64 = 0
+	for i := range ch {
+		answer += int64(i)
 	}
 
-	wg.Wait()
-	fmt.Println("all tasks done")
+	fmt.Println("Summ of all squares from 1 to ", lastNumberNeeded, " is ", answer)
 }
 
-func work(task *task, wg *sync.WaitGroup) {
+func work(task *task, wg *sync.WaitGroup, ch chan int) {
 	time.Sleep(1200 * time.Millisecond)
 	result := task.number * task.number
-	fmt.Println("The square of number ", task.number, " is ", result)
+	ch <- result
 	wg.Done()
 }
