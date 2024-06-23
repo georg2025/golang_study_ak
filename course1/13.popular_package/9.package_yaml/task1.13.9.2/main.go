@@ -25,9 +25,11 @@ type Db struct {
 
 func getConfigFromYAML(data []byte) (Config, error) {
 	config := Config{}
+
 	err := yaml.Unmarshal(data, &config)
 	if err != nil {
 		return Config{}, err
 	}
+
 	return config, nil
 }

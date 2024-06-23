@@ -81,6 +81,7 @@ func UpdateUser(user User) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -95,5 +96,6 @@ func DeleteUser(id int) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }

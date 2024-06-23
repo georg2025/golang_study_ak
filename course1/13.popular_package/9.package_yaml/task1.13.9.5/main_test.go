@@ -21,12 +21,14 @@ age: 24`)
 		{inData: jsonData, expected: jsonPerson, wantErr: false},
 		{inData: yamlData, expected: yamlPerson, wantErr: false},
 	}
+
 	for _, tc := range testCases {
 		result := Person{}
 		err := unmarshal(tc.inData, &result)
 		if (err != nil) != tc.wantErr {
 			t.Errorf("Got %v, expected %v", err, tc.wantErr)
 		}
+
 		if !reflect.DeepEqual(tc.expected, result) {
 			t.Errorf("Got %v, expected %v", result, tc.expected)
 		}

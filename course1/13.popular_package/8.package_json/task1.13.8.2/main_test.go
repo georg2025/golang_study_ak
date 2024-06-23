@@ -24,9 +24,11 @@ func Test_getJSON(t *testing.T) {
 
 	for _, tc := range testCases {
 		result, err := getUsersFromJSON(tc.inData)
+
 		if (err != nil) != tc.wantErr {
 			t.Errorf("Got %v, expected %v", err, tc.wantErr)
 		}
+
 		if !reflect.DeepEqual(tc.expected, result) {
 			t.Errorf("Got %v, expected %v", result, tc.expected)
 		}

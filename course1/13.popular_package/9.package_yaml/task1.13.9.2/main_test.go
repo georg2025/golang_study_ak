@@ -31,6 +31,7 @@ db:
 		if (err != nil) != tc.wantErr {
 			t.Errorf("Got %v, expected %v", err, tc.wantErr)
 		}
+
 		if !reflect.DeepEqual(tc.expected, result) {
 			t.Errorf("Got %v, expected %v", result, tc.expected)
 		}

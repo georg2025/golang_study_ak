@@ -21,12 +21,16 @@ func getJSON(data []User) (string, error) {
 	if len(data) == 0 {
 		return "", nil
 	}
+
 	var sb strings.Builder
+
 	for _, i := range data {
 		jsonData, err := json.Marshal(i)
+
 		if err != nil {
 			return "", err
 		}
+
 		sb.WriteString(string(jsonData))
 	}
 	return sb.String(), nil

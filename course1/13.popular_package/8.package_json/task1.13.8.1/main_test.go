@@ -19,6 +19,7 @@ func Test_getJSON(t *testing.T) {
 	ivan := User{Name: "Ivan", Age: 21, Comments: []Comment{comment3, comment4}}
 	users1 := []User{mary, ivan}
 	users2 := []User{}
+
 	testCases := []tc{
 		{inData: users1, expected: `{"name":"Mary","age":32,"comments":[{"text":"hello"},{"text":"go"}]}{"name":"Ivan","age":21,"comments":[{"text":"moo"},{"text":"what"}]}`, wantErr: false},
 		{inData: users2, expected: "", wantErr: false},
@@ -26,9 +27,11 @@ func Test_getJSON(t *testing.T) {
 
 	for _, tc := range testCases {
 		result, err := getJSON(tc.inData)
+
 		if (err != nil) != tc.wantErr {
 			t.Errorf("Got %v, expected %v", err, tc.wantErr)
 		}
+
 		if result != tc.expected {
 			t.Errorf("Got %s, expected %s", result, tc.expected)
 		}

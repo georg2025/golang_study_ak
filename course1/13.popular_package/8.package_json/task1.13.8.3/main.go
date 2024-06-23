@@ -27,6 +27,7 @@ func main() {
 	users := []User{mary, ivan}
 	filePath := "/home/george/goproject/src/student.vkusvill.ru/George/go-course/golang_study_ak/course1/13.popular_package/8.package_json/task1.13.8.3/test/file.txt"
 	err := WriteFile(filePath, users)
+
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -36,27 +37,36 @@ func getJSON(data []User) (string, error) {
 	if len(data) == 0 {
 		return "", nil
 	}
+
 	var sb strings.Builder
+
 	for _, i := range data {
 		jsonData, err := json.Marshal(i)
+
 		if err != nil {
 			return "", err
 		}
+
 		sb.WriteString(string(jsonData))
 	}
+
 	return sb.String(), nil
 }
 
 func WriteFile(filePath string, data []User) error {
 	path := filepath.Dir(filePath)
 	_, err := os.Stat(path)
+
 	if os.IsNotExist(err) {
 		os.MkdirAll(path, 0755)
 	}
+
 	infoToWrite, err := getJSON(data)
+
 	if err != nil {
 		return err
 	}
+
 	err = os.WriteFile(filePath, []byte(infoToWrite), 0644)
 	return err
 }

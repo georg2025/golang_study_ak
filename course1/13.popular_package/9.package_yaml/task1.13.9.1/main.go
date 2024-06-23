@@ -41,9 +41,11 @@ type Db struct {
 func getYAML(config []Config) (string, error) {
 	var buf bytes.Buffer
 	encoder := yaml.NewEncoder(&buf)
+
 	err := encoder.Encode(config)
 	if err != nil {
 		return "", err
 	}
+
 	return buf.String(), nil
 }

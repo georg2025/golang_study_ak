@@ -124,6 +124,7 @@ func PrepareQuery(operation string, table string, user User) (string, []interfac
 	var request string
 	var args []interface{}
 	var err error
+
 	switch operation {
 	case "insert":
 		request, args, err = sql.Insert(table).Columns("name", "age").Values(user.Name, user.Age).ToSql()
@@ -136,5 +137,6 @@ func PrepareQuery(operation string, table string, user User) (string, []interfac
 	default:
 		return "", nil, fmt.Errorf("cant figure out what operation do you want")
 	}
+
 	return request, args, err
 }

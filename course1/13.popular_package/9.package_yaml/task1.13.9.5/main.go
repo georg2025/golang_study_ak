@@ -21,9 +21,11 @@ func unmarshal(data []byte, v interface{}) error {
 	if err == nil {
 		return err
 	}
+
 	err = yaml.Unmarshal(data, v)
 	if err != nil {
 		return fmt.Errorf("cant decode neither JSON, nor YAML")
 	}
+
 	return nil
 }

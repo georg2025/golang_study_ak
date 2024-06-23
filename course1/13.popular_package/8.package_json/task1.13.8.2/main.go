@@ -20,10 +20,13 @@ func getUsersFromJSON(data []byte) ([]User, error) {
 	if len(data) == 0 {
 		return []User{}, nil
 	}
+
 	users := []User{}
 	err := json.Unmarshal(data, &users)
+
 	if err != nil {
 		return nil, err
 	}
+
 	return users, nil
 }
