@@ -33,5 +33,6 @@ func getJSON(data []User) (string, error) {
 
 		sb.WriteString(string(jsonData))
 	}
+
 	return sb.String(), nil
 }
