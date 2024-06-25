@@ -1,7 +1,7 @@
 package main
 
 const (
-	ProduncCocaCola = iota
+	ProductCocaCola = iota
 	ProductPepsi
 	ProductSprite
 )
@@ -37,6 +37,96 @@ type StatisticProfit struct {
 	getAllData              func() []float64
 }
 
-func getSubSlice(xs []int, start, end int) []int {
-	return xs[start:end]
+func NewStatisticProfit(opts ...func(*StatisticProfit)) Profitable {
+	statisticProfit := &StatisticProfit{}
+	for _, i := range opts {
+		i(statisticProfit)
+	}
+
+	return statisticProfit
+}
+
+func (s *StatisticProfit) GetAverageProfit() float64 {
+	return s.getAverageProfit()
+}
+
+func (s *StatisticProfit) GetAverageProfitPercent() float64 {
+	return s.getAverageProfitPercent()
+}
+
+func (s *StatisticProfit) GetCurrentProfit() float64 {
+	return s.getCurrentProfit()
+}
+
+func (s *StatisticProfit) GetDifferenceProfit() float64 {
+	return s.getDifferenceProfit()
+}
+
+func (s *StatisticProfit) GetAllData() []float64 {
+	return s.getAllData()
+}
+
+func (s *StatisticProfit) SetProduct(p *Product) {
+	s.product = p
+}
+
+func (s *StatisticProfit) Sum(prices []float64) float64 {
+	result := 0.0
+	for _, i := range prices {
+		result += i
+	}
+
+	return result
+}
+
+func (s *StatisticProfit) Average(prices []float64) float64 {
+	result := 0.0
+	for _, i := range prices {
+		result += i
+	}
+
+	return result / float64(len(prices))
+}
+
+func WithAverageProfit(s *StatisticProfit) {
+	s.getAverageProfit = func() float64 {
+		return s.Average(s.product.Sells) - s.Average(s.product.Buys)
+	}
+}
+
+func WithAverageProfitPercent(s *StatisticProfit) {
+	s.getAverageProfitPercent = func() float64 {
+		return s.getAverageProfit() / s.Average(s.product.Buys) * 100
+	}
+}
+
+func WithCurrentProfit(s *StatisticProfit) {
+	s.getCurrentProfit = func() float64 {
+		return s.product.CurrentPrice - s.product.CurrentPrice*(100-s.product.ProfitPercent)/100
+	}
+}
+
+func WithDiffenceProfit(s *StatisticProfit) {
+	s.getDifferenceProfit = func() float64 {
+		return s.product.CurrentPrice - s.Average(s.product.Sells)
+	}
+}
+
+func WithAllData(s *StatisticProfit) {
+	s.getAllData = func() []float64 {
+		res := make([]float64, 0, 4)
+		if s.getAverageProfit != nil {
+			res = append(res, s.getAverageProfit())
+		}
+		if s.getAverageProfitPercent != nil {
+			res = append(res, s.getAverageProfitPercent())
+		}
+		if s.getCurrentProfit != nil {
+			res = append(res, s.getCurrentProfit())
+		}
+		if s.getDifferenceProfit != nil {
+			res = append(res, s.getDifferenceProfit())
+		}
+		return res
+	}
 }
