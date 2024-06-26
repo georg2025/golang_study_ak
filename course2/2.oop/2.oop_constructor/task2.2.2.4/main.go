@@ -1,87 +1,55 @@
 package main
 
 import (
-	"fmt"
+	"io"
 )
 
-type Account interface {
-	Deposit(amount float64) error
-	Withdraw(amount float64) error
-	Balance() float64
+// Logger interface
+type Logger interface {
+	Log(message string)
 }
 
-type CheckingAccount struct {
-	balance float64
+type FileLogger struct {
+	file io.ReadWriter
 }
 
-type SavingsAccount struct {
-	CheckingAccount
-	MinimumDeposit float64
+type ConsoleLogger struct {
+	out io.ReadWriter
 }
 
-func (c *CheckingAccount) Deposit(amount float64) error {
-	c.balance += amount
-	return nil
+func (logger ConsoleLogger) Log(message string) {
+	logger.out.Write([]byte(message))
 }
 
-func (c *SavingsAccount) Deposit(amount float64) error {
-	c.balance += amount
-	return nil
+func (logger FileLogger) Log(message string) {
+	logger.file.Write([]byte(message))
 }
 
-func (c *CheckingAccount) Withdraw(amount float64) error {
-	if c.balance < amount {
-		return fmt.Errorf("not enogh money")
-	}
-
-	c.balance -= amount
-	return nil
+type LogSystem struct {
+	logger Logger
 }
 
-func (c *SavingsAccount) Withdraw(amount float64) error {
-	if c.balance-amount < c.MinimumDeposit {
-		return fmt.Errorf("your ballance cant be less than %v", c.MinimumDeposit)
-	}
+// LogOption functional option type
+type LogOption func(*LogSystem)
 
-	c.balance -= amount
-	return nil
-}
-
-func (c *CheckingAccount) Balance() float64 {
-	return c.balance
-}
-func (c *SavingsAccount) Balance() float64 {
-	return c.balance
-}
-
-type Customer struct {
-	ID      int
-	Name    string
-	Account Account
-}
-
-type CustomerOption func(*Customer)
-
-func WithName(name string) CustomerOption {
-	return func(c *Customer) {
-		c.Name = name
+func WithLogger(logger Logger) LogOption {
+	return func(ls *LogSystem) {
+		ls.logger = logger
 	}
 }
 
-func WithAccount(account Account) CustomerOption {
-	return func(c *Customer) {
-		c.Account = account
-	}
-}
-
-func NewCustomer(id int, options ...CustomerOption) *Customer {
-	customer := &Customer{}
+func NewLogSystem(options ...LogOption) *LogSystem {
+	logSystem := &LogSystem{}
 
 	for _, option := range options {
-		option(customer)
+		option(logSystem)
 	}
 
-	return customer
+	return logSystem
+}
+
+func (logSystem LogSystem) Log(message string) {
+	logSystem.logger.Log(message)
 }
 
 func main() {

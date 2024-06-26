@@ -1,43 +1,55 @@
 package main
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
 )
 
-func TestNewCustomerWithNameAndAccount(t *testing.T) {
-	savings := &SavingsAccount{}
-	savings.Deposit(1000)
-	customer := NewCustomer(1, WithName("John Doe"), WithAccount(savings))
+func TestLogSystemLogsMessageUsingFileLogger(t *testing.T) {
+	file, err := ioutil.TempFile("", "log.txt")
+	if err != nil {
+		t.Fatalf("Failed to create temp file: %v", err)
+	}
+	defer os.Remove(file.Name())
+	defer file.Close()
 
-	if customer.Name != "John Doe" {
-		t.Errorf("expected customer name to be 'John Doe', got %v", customer.Name)
+	fileLogger := FileLogger{file: file}
+	logSystem := NewLogSystem(WithLogger(fileLogger))
+	logSystem.Log("Hello, world!")
+
+	file.Seek(0, 0)
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		t.Fatalf("Failed to read from temp file: %v", err)
 	}
 
-	if customer.Account.Balance() != 1000 {
-		t.Errorf("expected account balance to be 1000, got %v", customer.Account.Balance())
-	}
-
-	customer.Account.Withdraw(500)
-
-	if customer.Account.Balance() != 500 {
-		t.Errorf("expected account balance to be 500, got %v", customer.Account.Balance())
+	expected := "Hello, world!"
+	if string(content) != expected {
+		t.Errorf("Expected %q but got %q", expected, string(content))
 	}
 }
 
-func TestWithdrawFromCheckingAccountWithInsufficientBalance(t *testing.T) {
-	checking := &CheckingAccount{}
-	checking.Deposit(50)
-	err := checking.Withdraw(100)
+func TestLogSystemLogsEmptyMessage(t *testing.T) {
+	file, err := ioutil.TempFile("", "log.txt")
+	if err != nil {
+		t.Fatalf("Failed to create temp file: %v", err)
+	}
+	defer os.Remove(file.Name())
+	defer file.Close()
 
-	if err == nil {
-		t.Errorf("expected error when withdrawing more than balance, got nil")
+	fileLogger := FileLogger{file: file}
+	logSystem := NewLogSystem(WithLogger(fileLogger))
+	logSystem.Log("")
+
+	file.Seek(0, 0)
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		t.Fatalf("Failed to read from temp file: %v", err)
 	}
 
-	if err.Error() != "not enogh money" {
-		t.Errorf("expected error message 'not enogh money', got %v", err.Error())
-	}
-
-	if checking.Balance() != 50 {
-		t.Errorf("expected balance to remain 50, got %v", checking.Balance())
+	expected := ""
+	if string(content) != expected {
+		t.Errorf("Expected %q but got %q", expected, string(content))
 	}
 }
