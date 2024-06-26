@@ -13,6 +13,7 @@ type RemoteLogger struct {
 func LogAll(loggers []Logger, message string) {
 	for _, logger := range loggers {
 		err := logger.Log(message)
+
 		if err != nil {
 			log.Println("Failed to log message:", err)
 		}
@@ -39,9 +40,11 @@ func (logger *ConsoleLogger) Log(info string) error {
 func (logger *FileLogger) Log(info string) error {
 	file, err := os.OpenFile(logger.File, os.O_WRONLY|os.O_CREATE, 0644)
 	defer file.Close()
+
 	if err != nil {
 		return err
 	}
+
 	_, err = file.Write([]byte(info))
 	return err
 }

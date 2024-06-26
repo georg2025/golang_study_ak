@@ -32,6 +32,7 @@ func (order *DineInOrder) RemoveItem(item string) error {
 	if order.orderDetails[item] < 1 {
 		return fmt.Errorf("not enough %s in order", item)
 	}
+
 	order.orderDetails[item]--
 	return nil
 }
@@ -40,6 +41,7 @@ func (order *TakeAwayOrder) RemoveItem(item string) error {
 	if order.orderDetails[item] < 1 {
 		return fmt.Errorf("not enough %s in order", item)
 	}
+
 	order.orderDetails[item]--
 	return nil
 }
