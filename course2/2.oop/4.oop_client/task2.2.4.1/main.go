@@ -149,7 +149,7 @@ func UnmarshalCandles(data []byte) (CandlesHistory, error) {
 }
 
 func (e *Exmo) GetTicker() (Ticker, error) {
-	request := "https://api.exmo.com/v1.1" + ticker
+	request := e.url + ticker
 	body, err := GetRespBody(e, request)
 
 	if err != nil {
