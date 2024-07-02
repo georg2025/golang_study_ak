@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 	"time"
 
@@ -170,4 +171,38 @@ func TestGetClosePriceReturnsCorrectPrices(t *testing.T) {
 			t.Errorf("expected price %v, got %v", expectedPrices[i], price)
 		}
 	}
+}
+
+func TestIndicator(t *testing.T) {
+	mockResponse := CandlesHistory{
+		Candles: []Candle{
+			{C: 100.0},
+			{C: 200.0},
+			{C: 300.0},
+			{C: 400.0},
+			{C: 500.0},
+		},
+	}
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		json.NewEncoder(w).Encode(mockResponse)
+	}))
+	defer mockServer.Close()
+
+	exchange := NewExmo(WithURL(mockServer.URL))
+	ind := NewIndicator(exchange, WithCalculateEMA(calculateEMA), WithCalculateSMA(calculateSMA))
+	result, err := ind.SMA("BTC_USD", 5, 3, time.Now().AddDate(0, 0, -2), time.Now())
+
+	if err != nil {
+		t.Errorf("got unexpected error: %v", err)
+	}
+
+	expected := []float64{100.0, 150.0, 200.0, 300.0, 400.0}
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("Expected %v, got %v", expected, result)
+	}
+
+	result, err = ind.EMA("BTC_USD", 5, 3, time.Now().AddDate(0, 0, -2), time.Now())
+	expected = []float64{100.0, 150.0, 225.0, 312.5, 406.25}
+	assert.NoError(t, err)
+	assert.Equal(t, result, expected)
 }

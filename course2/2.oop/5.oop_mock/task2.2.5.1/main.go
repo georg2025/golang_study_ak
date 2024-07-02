@@ -2,10 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/cinar/indicator"
 )
 
 const (
@@ -61,6 +64,13 @@ type Pair struct {
 	Amount   string `json:"amount"`
 }
 
+type Indicator struct {
+	exchange     Exchanger
+	calculateSMA func(data []float64, period int) []float64
+	calculateEMA func(data []float64, period int) []float64
+}
+
+type IndicatorOption func(*Indicator)
 type Currencies []string
 type OrderBook map[string]OrderBookPair
 type Ticker map[string]TickerValue
@@ -72,6 +82,11 @@ type Exchanger interface {
 	GetCurrencies() (Currencies, error)
 	GetCandlesHistory(pair string, limit int, start, end time.Time) (CandlesHistory, error)
 	GetClosePrice(pair string, limit int, start, end time.Time) ([]float64, error)
+}
+
+type Indicatorer interface {
+	SMA(pair string, resolution, period int, from, to time.Time) ([]float64, error)
+	EMA(pair string, resolution, period int, from, to time.Time) ([]float64, error)
 }
 
 type Exmo struct {
@@ -282,5 +297,74 @@ func (e *Exmo) GetClosePrice(pair string, limit int, start, end time.Time) ([]fl
 	return closedPrices, nil
 }
 
+func NewIndicator(exchange Exchanger, opts ...IndicatorOption) Indicatorer {
+	indicator := &Indicator{exchange: exchange}
+
+	for _, option := range opts {
+		option(indicator)
+	}
+
+	return indicator
+}
+
+func (i *Indicator) SMA(pair string, resolution, period int, from, to time.Time) ([]float64, error) {
+	data, err := i.exchange.GetClosePrice(pair, resolution, from, to)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return i.calculateSMA(data, period), nil
+}
+
+func (i *Indicator) EMA(pair string, resolution, period int, from, to time.Time) ([]float64, error) {
+	data, err := i.exchange.GetClosePrice(pair, resolution, from, to)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return i.calculateEMA(data, period), nil
+}
+
+func calculateSMA(closing []float64, period int) []float64 {
+	return indicator.Sma(period, closing)
+}
+
+func calculateEMA(closing []float64, period int) []float64 {
+	return indicator.Ema(period, closing)
+}
+
+func WithCalculateEMA(f func(closing []float64, period int) []float64) IndicatorOption {
+	return func(i *Indicator) {
+		i.calculateEMA = f
+	}
+}
+
+func WithCalculateSMA(f func(closing []float64, period int) []float64) IndicatorOption {
+	return func(i *Indicator) {
+		i.calculateSMA = f
+	}
+}
+
 func main() {
+	var exchange Exchanger
+	exchange = NewExmo()
+	ind := NewIndicator(exchange, WithCalculateEMA(calculateEMA), WithCalculateSMA(calculateSMA))
+	sma, err := ind.SMA("BTC_USD", 30, 5, time.Now().AddDate(0, 0, -2), time.Now())
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println(sma)
+	ema, err := ind.EMA("BTC_USD", 30, 5, time.Now().AddDate(0, 0, -2), time.Now())
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println(ema)
 }
