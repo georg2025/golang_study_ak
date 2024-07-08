@@ -170,7 +170,7 @@ type GeneralIndicator struct {
 
 func (generalIndicator *GeneralIndicator) GetData(pair string, period int, from, to time.Time,
 	indicator Indicatorer) ([]float64, error) {
-	return indicator.GetData(pair, 30, period, from, to)
+	return indicator.GetData(pair, 15, period, from, to)
 }
 
 func main() {
