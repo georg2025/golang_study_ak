@@ -23,7 +23,7 @@ func main() {
 
 	for scanner.Scan() {
 		message := scanner.Text()
-		_, err := conn.Write([]byte(message + "\n"))
+		_, err := conn.Write([]byte(message + "\r\n"))
 
 		if err != nil {
 			fmt.Println("error with writing data")

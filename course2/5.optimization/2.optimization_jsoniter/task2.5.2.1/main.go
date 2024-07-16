@@ -7,7 +7,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-//go:generate easyjson -all
+//go:generate easyjson -all $main.go
 type User struct {
 	ID       int    `json:"id"`
 	Username string `json:"username"`

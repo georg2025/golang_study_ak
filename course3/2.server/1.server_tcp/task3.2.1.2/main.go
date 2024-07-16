@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"net"
 	"strings"
@@ -18,18 +17,15 @@ func handleConnection(conn net.Conn) {
 		return
 	}
 
-	scanner := bufio.NewScanner(conn)
-	for scanner.Scan() {
-		request := scanner.Text()
-		parts := strings.Split(string(request), " ")
+	parts := strings.Split(string(request), " ")
 
-		if parts[0] == "GET" && parts[1] == "/" {
-			var sb strings.Builder
-			sb.WriteString("HTTP/1.1 200 OK\r\n")
-			sb.WriteString("Content-Type: text/html\r\n")
-			sb.WriteString("\r\n")
+	if parts[0] == "GET" && parts[1] == "/" {
+		var sb strings.Builder
+		sb.WriteString("HTTP/1.1 200 OK\r\n")
+		sb.WriteString("Content-Type: text/html\r\n")
+		sb.WriteString("\r\n")
 
-			html := `
+		html := `
 			<html>
 			<head>
 			<title>Webserver</title>
@@ -39,23 +35,22 @@ func handleConnection(conn net.Conn) {
 			</body>
 			</html>
 		`
-			sb.WriteString(html)
+		sb.WriteString(html)
 
-			_, err = conn.Write([]byte(sb.String()))
+		_, err = conn.Write([]byte(sb.String()))
 
-			if err != nil {
-				fmt.Println("Error with message sending: ", err)
-			}
-		} else {
-			var sb strings.Builder
-			sb.WriteString("HTTP/1.1 404 Not Found\r\n")
-			sb.WriteString("\r\n")
+		if err != nil {
+			fmt.Println("Error with message sending: ", err)
+		}
+	} else {
+		var sb strings.Builder
+		sb.WriteString("HTTP/1.1 404 Not Found\r\n")
+		sb.WriteString("\r\n")
 
-			_, err = conn.Write([]byte(sb.String()))
+		_, err = conn.Write([]byte(sb.String()))
 
-			if err != nil {
-				fmt.Println("Error with message sending: ", err)
-			}
+		if err != nil {
+			fmt.Println("Error with message sending: ", err)
 		}
 	}
 
