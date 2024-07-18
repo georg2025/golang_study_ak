@@ -4,15 +4,17 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 )
 
 func main() {
 	r := makeRouter()
-	http.ListenAndServe("localhost:8000", r)
+	http.ListenAndServe("localhost:8080", r)
 }
 
 func makeRouter() *chi.Mux {
 	r := chi.NewRouter()
+	r.Use(middleware.Logger)
 	r.Get("/1", firstAnswer)
 	r.Get("/2", secondAnswer)
 	r.Get("/3", thirdAnswer)

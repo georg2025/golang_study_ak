@@ -8,7 +8,7 @@ import (
 
 func main() {
 	r := makeRouter()
-	http.ListenAndServe("localhost:8000", r)
+	http.ListenAndServe(":1313", r)
 }
 
 func makeRouter() *chi.Mux {
