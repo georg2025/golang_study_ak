@@ -1,18 +1,35 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/jwtauth"
+	"github.com/golang-jwt/jwt/v5"
 )
+
+// @title GeoService
+// @version 1.0
+// @description Simple GeoService.
+
+// @host localhost:8080
+// @BasePath /
 
 const (
 	adress = "localhost:8080"
 )
+
+var Users = make(map[string]string)
+
+var tokenAuth *jwtauth.JWTAuth
 
 func main() {
 	r := makeRouter()
@@ -21,13 +38,82 @@ func main() {
 
 func makeRouter() *chi.Mux {
 	r := chi.NewRouter()
+	tokenAuth = jwtauth.New("HS256", []byte("mysecretkey"), nil)
 	r.Use(middleware.Logger)
-	r.Post("/api/address/search", searchAnswer)
-	r.Post("/api/address/geocode", geocodeAnswer)
+
+	r.Group(func(r chi.Router) {
+		r.Use(jwtauth.Verifier(tokenAuth))
+		r.Use(jwtauth.Authenticator)
+		r.Post("/api/address/search", searchAnswer)
+		r.Post("/api/address/geocode", geocodeAnswer)
+	})
+
+	r.Post("/api/register", registerUser)
+	r.Post("/api/login", loginUser)
 	r.NotFound(usualAnswer)
 	return r
 }
 
+func registerUser(w http.ResponseWriter, r *http.Request) {
+	var newUser User
+
+	if err := json.NewDecoder(r.Body).Decode(&newUser); err != nil {
+		newErrorResponce(w, err)
+		return
+	}
+
+	if _, ok := Users[newUser.Username]; ok {
+		newErrorResponce(w, fmt.Errorf("username already exist"))
+		return
+	}
+
+	passwordHash := hashPassword([]byte(newUser.Password))
+	Users[newUser.Username] = passwordHash
+	message := fmt.Sprintf("User %s sucessfully created", newUser.Username)
+
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte(message))
+}
+
+func loginUser(w http.ResponseWriter, r *http.Request) {
+	var user User
+
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		newErrorResponce(w, err)
+		return
+	}
+
+	if _, ok := Users[user.Username]; !ok {
+		newErrorResponce(w, fmt.Errorf("user dont exist"))
+		return
+	}
+
+	passwordHash := hashPassword([]byte(user.Password))
+	if passwordHash != Users[user.Username] {
+		newErrorResponce(w, fmt.Errorf("invalid password"))
+		return
+	}
+	claims := jwt.MapClaims{
+		"username": user.Username,
+		"exp":      jwtauth.ExpireIn(time.Hour),
+	}
+	_, tokenString, _ := tokenAuth.Encode(claims)
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(tokenString))
+}
+
+// searchAnswer handle POST-requests on api/address/search
+// @Summary SearchCity
+// @Tags Search
+// @Description Search city Name by coords
+// @Accept  json
+// @Produce  json
+// @Param  coordinates  body  RequestAddressSearch true  "Lattitude and Longitude"
+// @Success 200 {object} string
+// @Failure 400 {object} errorResponce
+// @Failure 500 {object} errorResponce
+// @Router /api/address/search [post]
 func searchAnswer(w http.ResponseWriter, r *http.Request) {
 	var coordinates RequestAddressSearch
 	json.NewDecoder(r.Body).Decode(&coordinates)
@@ -36,14 +122,14 @@ func searchAnswer(w http.ResponseWriter, r *http.Request) {
 	resp, err := http.Get(url)
 
 	if err != nil {
-		http.Error(w, "url error", http.StatusInternalServerError)
+		newErrorResponce(w, err)
 		return
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		http.Error(w, "server error", http.StatusInternalServerError)
+		newErrorResponce(w, err)
 		return
 	}
 
@@ -51,7 +137,7 @@ func searchAnswer(w http.ResponseWriter, r *http.Request) {
 
 	err = json.Unmarshal(body, &address)
 	if err != nil {
-		http.Error(w, "unmarshal error", http.StatusInternalServerError)
+		newErrorResponce(w, err)
 		return
 	}
 
@@ -59,9 +145,60 @@ func searchAnswer(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("you are in " + address.Address.City))
 }
 
+// geocodeAnswer handle POST-requests on api/address/geocode
+// @Summary SearchCoords
+// @Tags Search
+// @Description Search coords by address
+// @Accept  json
+// @Produce  json
+// @Param  coordinates  body  Address true  "House number, road, suburb, city, state, country"
+// @Success 200 {object} string
+// @Failure 400 {object} errorResponce
+// @Failure 500 {object} errorResponce
+// @Router /api/address/search [post]
 func geocodeAnswer(w http.ResponseWriter, r *http.Request) {
+	var address Address
+	json.NewDecoder(r.Body).Decode(&address)
+
+	parts := []string{}
+	parts = append(parts, strings.Split(address.House_number, " ")...)
+	parts = append(parts, strings.Split(address.Road, " ")...)
+	parts = append(parts, strings.Split(address.Suburb, " ")...)
+	parts = append(parts, strings.Split(address.City, " ")...)
+	parts = append(parts, strings.Split(address.State, " ")...)
+	parts = append(parts, strings.Split(address.Country, " ")...)
+
+	var sb strings.Builder
+	for _, i := range parts {
+		if i != "" {
+			sb.WriteString("+")
+			sb.WriteString(i)
+		}
+	}
+
+	request := "https://nominatim.openstreetmap.org/search?q=" + strings.Trim(sb.String(), "+") + "&format=json"
+
+	resp, err := http.Get(request)
+	if err != nil {
+		newErrorResponce(w, err)
+		return
+	}
+
+	answer, err := io.ReadAll(resp.Body)
+	if err != nil {
+		newErrorResponce(w, err)
+		return
+	}
+
+	var coords []GetCoords
+
+	err = json.Unmarshal(answer, &coords)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("This is geocode servise. I dont know for now, what it is doing"))
+	w.Write([]byte("Your lattitude = " + coords[0].Lat + "; Your longitude = " + coords[0].Lon))
 }
 
 func usualAnswer(w http.ResponseWriter, r *http.Request) {
@@ -85,4 +222,28 @@ type Address struct {
 type RequestAddressSearch struct {
 	Lat float64 `json:"lat"`
 	Lng float64 `json:"lng"`
+}
+
+type GetCoords struct {
+	Lat string `json:"lat"`
+	Lon string `json:"lon"`
+}
+
+type errorResponce struct {
+	Message string `json:"message"`
+}
+
+func hashPassword(password []byte) string {
+	hash := sha256.New()
+	hash.Write(password)
+	return hex.EncodeToString(hash.Sum(nil))
+}
+func newErrorResponce(w http.ResponseWriter, err error) {
+	errResponce := errorResponce{Message: err.Error()}
+	http.Error(w, errResponce.Message, http.StatusInternalServerError)
+}
+
+type User struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
