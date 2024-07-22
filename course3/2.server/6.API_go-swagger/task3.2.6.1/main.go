@@ -11,6 +11,13 @@ import (
 	"github.com/go-chi/chi/middleware"
 )
 
+// @title GeoService
+// @version 1.0
+// @description Simple GeoService.
+
+// @host localhost:8080
+// @BasePath /
+
 const (
 	adress = "localhost:8080"
 )
@@ -29,6 +36,17 @@ func makeRouter() *chi.Mux {
 	return r
 }
 
+// searchAnswer handle POST-requests on api/address/search
+// @Summary SearchCity
+// @Tags Search
+// @Description Search city Name by coords
+// @Accept  json
+// @Produce  json
+// @Param  coordinates  body  RequestAddressSearch true  "Lattitude and Longitude"
+// @Success 200 {object} string
+// @Failure 400 {object} errorResponce
+// @Failure 500 {object} errorResponce
+// @Router /api/address/search [post]
 func searchAnswer(w http.ResponseWriter, r *http.Request) {
 	var coordinates RequestAddressSearch
 	json.NewDecoder(r.Body).Decode(&coordinates)
@@ -37,14 +55,14 @@ func searchAnswer(w http.ResponseWriter, r *http.Request) {
 	resp, err := http.Get(url)
 
 	if err != nil {
-		http.Error(w, "url error", http.StatusInternalServerError)
+		newErrorResponce(w, err)
 		return
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		http.Error(w, "server error", http.StatusInternalServerError)
+		newErrorResponce(w, err)
 		return
 	}
 
@@ -52,7 +70,7 @@ func searchAnswer(w http.ResponseWriter, r *http.Request) {
 
 	err = json.Unmarshal(body, &address)
 	if err != nil {
-		http.Error(w, "unmarshal error", http.StatusInternalServerError)
+		newErrorResponce(w, err)
 		return
 	}
 
@@ -60,6 +78,17 @@ func searchAnswer(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("you are in " + address.Address.City))
 }
 
+// geocodeAnswer handle POST-requests on api/address/geocode
+// @Summary SearchCoords
+// @Tags Search
+// @Description Search coords by address
+// @Accept  json
+// @Produce  json
+// @Param  coordinates  body  Address true  "House number, road, suburb, city, state, country"
+// @Success 200 {object} string
+// @Failure 400 {object} errorResponce
+// @Failure 500 {object} errorResponce
+// @Router /api/address/search [post]
 func geocodeAnswer(w http.ResponseWriter, r *http.Request) {
 	var address Address
 	json.NewDecoder(r.Body).Decode(&address)
@@ -84,13 +113,13 @@ func geocodeAnswer(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := http.Get(request)
 	if err != nil {
-		http.Error(w, "url error", http.StatusInternalServerError)
+		newErrorResponce(w, err)
 		return
 	}
 
 	answer, err := io.ReadAll(resp.Body)
 	if err != nil {
-		http.Error(w, "server error", http.StatusInternalServerError)
+		newErrorResponce(w, err)
 		return
 	}
 
@@ -131,4 +160,13 @@ type RequestAddressSearch struct {
 type GetCoords struct {
 	Lat string `json:"lat"`
 	Lon string `json:"lon"`
+}
+
+type errorResponce struct {
+	Message string `json:"message"`
+}
+
+func newErrorResponce(w http.ResponseWriter, err error) {
+	errResponce := errorResponce{Message: err.Error()}
+	http.Error(w, errResponce.Message, http.StatusInternalServerError)
 }

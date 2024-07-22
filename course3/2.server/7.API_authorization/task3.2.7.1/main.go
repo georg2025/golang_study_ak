@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -61,48 +60,8 @@ func searchAnswer(w http.ResponseWriter, r *http.Request) {
 }
 
 func geocodeAnswer(w http.ResponseWriter, r *http.Request) {
-	var address Address
-	json.NewDecoder(r.Body).Decode(&address)
-
-	parts := []string{}
-	parts = append(parts, strings.Split(address.House_number, " ")...)
-	parts = append(parts, strings.Split(address.Road, " ")...)
-	parts = append(parts, strings.Split(address.Suburb, " ")...)
-	parts = append(parts, strings.Split(address.City, " ")...)
-	parts = append(parts, strings.Split(address.State, " ")...)
-	parts = append(parts, strings.Split(address.Country, " ")...)
-
-	var sb strings.Builder
-	for _, i := range parts {
-		if i != "" {
-			sb.WriteString("+")
-			sb.WriteString(i)
-		}
-	}
-
-	request := "https://nominatim.openstreetmap.org/search?q=" + strings.Trim(sb.String(), "+") + "&format=json"
-
-	resp, err := http.Get(request)
-	if err != nil {
-		http.Error(w, "url error", http.StatusInternalServerError)
-		return
-	}
-
-	answer, err := io.ReadAll(resp.Body)
-	if err != nil {
-		http.Error(w, "server error", http.StatusInternalServerError)
-		return
-	}
-
-	var coords []GetCoords
-
-	err = json.Unmarshal(answer, &coords)
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Your lattitude = " + coords[0].Lat + "; Your longitude = " + coords[0].Lon))
+	w.Write([]byte("This is geocode servise. I dont know for now, what it is doing"))
 }
 
 func usualAnswer(w http.ResponseWriter, r *http.Request) {
@@ -126,9 +85,4 @@ type Address struct {
 type RequestAddressSearch struct {
 	Lat float64 `json:"lat"`
 	Lng float64 `json:"lng"`
-}
-
-type GetCoords struct {
-	Lat string `json:"lat"`
-	Lon string `json:"lon"`
 }
