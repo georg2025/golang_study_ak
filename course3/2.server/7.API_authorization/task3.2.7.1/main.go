@@ -54,16 +54,27 @@ func makeRouter() *chi.Mux {
 	return r
 }
 
+// registerUser handle POST-requests on api/register
+// @Summary Register
+// @Tags Login
+// @Description Register user
+// @Accept  json
+// @Produce  json
+// @Param  input  body  User true  "username and password"
+// @Success 200 {object} string
+// @Failure 400 {object} errorResponce
+// @Failure 500 {object} errorResponce
+// @Router /api/register [post]
 func registerUser(w http.ResponseWriter, r *http.Request) {
 	var newUser User
 
 	if err := json.NewDecoder(r.Body).Decode(&newUser); err != nil {
-		newErrorResponce(w, err)
+		newErrorResponce(w, err, http.StatusInternalServerError)
 		return
 	}
 
 	if _, ok := Users[newUser.Username]; ok {
-		newErrorResponce(w, fmt.Errorf("username already exist"))
+		newErrorResponce(w, fmt.Errorf("username already exist"), http.StatusInternalServerError)
 		return
 	}
 
@@ -75,22 +86,33 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(message))
 }
 
+// loginUser handle POST-requests on api/login
+// @Summary Login
+// @Tags Login
+// @Description Login user
+// @Accept  json
+// @Produce  json
+// @Param  input  body  User true  "username and password"
+// @Success 200 {object} string
+// @Failure 400 {object} errorResponce
+// @Failure 500 {object} errorResponce
+// @Router /api/login [post]
 func loginUser(w http.ResponseWriter, r *http.Request) {
 	var user User
 
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		newErrorResponce(w, err)
+		newErrorResponce(w, err, http.StatusInternalServerError)
 		return
 	}
 
 	if _, ok := Users[user.Username]; !ok {
-		newErrorResponce(w, fmt.Errorf("user dont exist"))
+		newErrorResponce(w, fmt.Errorf("user dont exist"), http.StatusForbidden)
 		return
 	}
 
 	passwordHash := hashPassword([]byte(user.Password))
 	if passwordHash != Users[user.Username] {
-		newErrorResponce(w, fmt.Errorf("invalid password"))
+		newErrorResponce(w, fmt.Errorf("invalid password"), http.StatusForbidden)
 		return
 	}
 	claims := jwt.MapClaims{
@@ -122,14 +144,14 @@ func searchAnswer(w http.ResponseWriter, r *http.Request) {
 	resp, err := http.Get(url)
 
 	if err != nil {
-		newErrorResponce(w, err)
+		newErrorResponce(w, err, http.StatusInternalServerError)
 		return
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		newErrorResponce(w, err)
+		newErrorResponce(w, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -137,7 +159,7 @@ func searchAnswer(w http.ResponseWriter, r *http.Request) {
 
 	err = json.Unmarshal(body, &address)
 	if err != nil {
-		newErrorResponce(w, err)
+		newErrorResponce(w, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -180,13 +202,13 @@ func geocodeAnswer(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := http.Get(request)
 	if err != nil {
-		newErrorResponce(w, err)
+		newErrorResponce(w, err, http.StatusInternalServerError)
 		return
 	}
 
 	answer, err := io.ReadAll(resp.Body)
 	if err != nil {
-		newErrorResponce(w, err)
+		newErrorResponce(w, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -238,9 +260,9 @@ func hashPassword(password []byte) string {
 	hash.Write(password)
 	return hex.EncodeToString(hash.Sum(nil))
 }
-func newErrorResponce(w http.ResponseWriter, err error) {
+func newErrorResponce(w http.ResponseWriter, err error, responce int) {
 	errResponce := errorResponce{Message: err.Error()}
-	http.Error(w, errResponce.Message, http.StatusInternalServerError)
+	http.Error(w, errResponce.Message, responce)
 }
 
 type User struct {
