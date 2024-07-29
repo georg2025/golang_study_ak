@@ -74,12 +74,12 @@ func makeRouter() *chi.Mux {
 	r.Group(func(r chi.Router) {
 		r.Use(jwtauth.Verifier(tokenAuth))
 		r.Use(jwtauth.Authenticator)
-		r.Post("/api/address/search", responder.Servicer.SearchAnswer)
-		r.Post("/api/address/geocode", responder.Servicer.GeocodeAnswer)
+		r.Post("/api/address/search", responder.SearchAnswer)
+		r.Post("/api/address/geocode", responder.GeocodeAnswer)
 	})
 
-	r.Post("/api/register", responder.Servicer.RegisterUser)
-	r.Post("/api/login", responder.Servicer.LoginUser)
-	r.NotFound(responder.Servicer.NotFoundAnswer)
+	r.Post("/api/register", responder.RegisterUser)
+	r.Post("/api/login", responder.LoginUser)
+	r.NotFound(responder.NotFoundAnswer)
 	return r
 }

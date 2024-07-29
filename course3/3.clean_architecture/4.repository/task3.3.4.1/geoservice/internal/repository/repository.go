@@ -22,7 +22,7 @@ type UserRepository interface {
 	List(ctx context.Context) ([]service.User, error)
 }
 
-func StartPostgressDataBase(ctx context.Context) error {
+func StartPostgressDataBase(ctx context.Context) {
 	pool, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalf("Unable to connect to database: %v\n", err)
