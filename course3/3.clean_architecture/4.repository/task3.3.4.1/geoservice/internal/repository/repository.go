@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 type PostgressDataBase struct {
@@ -37,7 +38,7 @@ func StartPostgressDataBase(ctx context.Context) (*PostgressDataBase, error) {
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
 	connStr := "user=" + dbUser + " password=" + dbPassword + " dbname=" + dbName + " host=" + dbHost + " port=" + dbPort
-	db, err := sql.Open("postgress", connStr)
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return dataBase, err
 	}
@@ -51,7 +52,7 @@ func (db *PostgressDataBase) CreateNewUserTable() error {
 	newTableString := `CREATE TABLE IF NOT EXISTS users (
 		id SERIAL PRIMARY KEY,
 		username VARCHAR(100) NOT NULL UNIQUE,
-		password VARCHAR(32) NOT NULL,
+		password VARCHAR(100) NOT NULL,
 		isExist BOOLEAN DEFAULT true
 	);`
 
@@ -61,7 +62,7 @@ func (db *PostgressDataBase) CreateNewUserTable() error {
 
 func (db *PostgressDataBase) Create(ctx context.Context, user models.User) error {
 	query := `
-        INSERT INTO users (username, password, isExist)
+        INSERT INTO users (username, password, isexist)
         VALUES ($1, $2, $3)
         ON CONFLICT (username) DO NOTHING;
     `

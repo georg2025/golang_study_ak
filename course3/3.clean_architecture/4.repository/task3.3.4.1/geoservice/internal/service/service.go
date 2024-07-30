@@ -52,19 +52,9 @@ type GeoServicer interface {
 	LoginUser(user models.User) (int, string, error)
 	SearchAnswer(coordinates models.RequestAddressSearch) (int, models.ResponseAddress, error)
 	GeocodeAnswer(address models.Address) (int, []models.GetCoords, error)
+	GetByID(id string) (models.User, error)
 }
 
-// registerUser handle POST-requests on api/register
-// @Summary Register
-// @Tags Login
-// @Description Register user
-// @Accept  json
-// @Produce  json
-// @Param  input  body  User true  "username and password"
-// @Success 200 {object} string
-// @Failure 400 {object} errorResponce
-// @Failure 500 {object} errorResponce
-// @Router /api/register [post]
 func (c *GeoService) RegisterUser(user models.User) (int, error) {
 	_, ok, _ := c.Database.GetByName(context.Background(), user.Username)
 
@@ -74,21 +64,15 @@ func (c *GeoService) RegisterUser(user models.User) (int, error) {
 
 	passwordHash := hashPassword([]byte(user.Password))
 	user.Password = passwordHash
-	c.Database.Create(context.Background(), user)
+	err := c.Database.Create(context.Background(), user)
+
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
 	return http.StatusCreated, nil
 }
 
-// loginUser handle POST-requests on api/login
-// @Summary Login
-// @Tags Login
-// @Description Login user
-// @Accept  json
-// @Produce  json
-// @Param  input  body  User true  "username and password"
-// @Success 200 {object} string
-// @Failure 400 {object} errorResponce
-// @Failure 500 {object} errorResponce
-// @Router /api/login [post]
 func (c *GeoService) LoginUser(user models.User) (int, string, error) {
 	databaseUser, ok, _ := c.Database.GetByName(context.Background(), user.Username)
 
@@ -110,17 +94,6 @@ func (c *GeoService) LoginUser(user models.User) (int, string, error) {
 	return http.StatusOK, tokenString, nil
 }
 
-// searchAnswer handle POST-requests on api/address/search
-// @Summary SearchCity
-// @Tags Search
-// @Description Search city Name by coords
-// @Accept  json
-// @Produce  json
-// @Param  coordinates  body  RequestAddressSearch true  "Lattitude and Longitude"
-// @Success 200 {object} string
-// @Failure 400 {object} errorResponce
-// @Failure 500 {object} errorResponce
-// @Router /api/address/search [post]
 func (c *GeoService) SearchAnswer(coordinates models.RequestAddressSearch) (int, models.ResponseAddress, error) {
 	var address models.ResponseAddress
 	url := fmt.Sprintf("https://nominatim.openstreetmap.org/reverse?format=json&lat=%f&lon=%f", coordinates.Lat, coordinates.Lng)
@@ -144,17 +117,6 @@ func (c *GeoService) SearchAnswer(coordinates models.RequestAddressSearch) (int,
 	return http.StatusOK, address, nil
 }
 
-// geocodeAnswer handle POST-requests on api/address/geocode
-// @Summary SearchCoords
-// @Tags Search
-// @Description Search coords by address
-// @Accept  json
-// @Produce  json
-// @Param  coordinates  body  Address true  "House number, road, suburb, city, state, country"
-// @Success 200 {object} string
-// @Failure 400 {object} errorResponce
-// @Failure 500 {object} errorResponce
-// @Router /api/address/search [post]
 func (c *GeoService) GeocodeAnswer(address models.Address) (int, []models.GetCoords, error) {
 	parts := []string{}
 	parts = append(parts, strings.Split(address.House_number, " ")...)
@@ -191,6 +153,10 @@ func (c *GeoService) GeocodeAnswer(address models.Address) (int, []models.GetCoo
 	}
 
 	return http.StatusOK, coords, nil
+}
+
+func (c *GeoService) GetByID(id string) (models.User, error) {
+	return c.Database.GetByID(context.Background(), id)
 }
 
 func hashPassword(password []byte) string {

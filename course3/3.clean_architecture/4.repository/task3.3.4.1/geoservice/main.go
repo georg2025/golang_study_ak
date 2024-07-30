@@ -78,6 +78,7 @@ func makeRouter() *chi.Mux {
 		r.Post("/api/address/geocode", responder.GeocodeAnswer)
 	})
 
+	r.Get("/api/users/{id}", responder.GetUserByID)
 	r.Post("/api/register", responder.RegisterUser)
 	r.Post("/api/login", responder.LoginUser)
 	r.NotFound(responder.NotFoundAnswer)

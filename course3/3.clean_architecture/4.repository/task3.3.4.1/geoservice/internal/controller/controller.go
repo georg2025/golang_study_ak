@@ -7,6 +7,7 @@ import (
 	models "geoservice/models"
 	"net/http"
 
+	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
 )
 
@@ -17,7 +18,11 @@ type Controller struct {
 }
 
 func NewController(token *jwtauth.JWTAuth, options ...ControllerOption) *Controller {
-	service, _ := service.NewGeoService(service.WithToken(token))
+	service, err := service.NewGeoService(service.WithToken(token))
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	controller := &Controller{Servicer: service}
 	return controller
 }
@@ -28,6 +33,7 @@ type Responder interface {
 	SearchAnswer(w http.ResponseWriter, r *http.Request)
 	GeocodeAnswer(w http.ResponseWriter, r *http.Request)
 	NotFoundAnswer(w http.ResponseWriter, r *http.Request)
+	GetUserByID(w http.ResponseWriter, r *http.Request)
 }
 
 // registerUser handle POST-requests on api/register
@@ -36,10 +42,10 @@ type Responder interface {
 // @Description Register user
 // @Accept  json
 // @Produce  json
-// @Param  input  body  User true  "username and password"
+// @Param  input  body  models.User true  "username and password"
 // @Success 200 {object} string
-// @Failure 400 {object} errorResponce
-// @Failure 500 {object} errorResponce
+// @Failure 400 {object} models.ErrorResponce
+// @Failure 500 {object} models.ErrorResponce
 // @Router /api/register [post]
 func (c *Controller) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var newUser models.User
@@ -66,10 +72,10 @@ func (c *Controller) RegisterUser(w http.ResponseWriter, r *http.Request) {
 // @Description Login user
 // @Accept  json
 // @Produce  json
-// @Param  input  body  User true  "username and password"
+// @Param  input  body  models.User true  "username and password"
 // @Success 200 {object} string
-// @Failure 400 {object} errorResponce
-// @Failure 500 {object} errorResponce
+// @Failure 400 {object} models.ErrorResponce
+// @Failure 500 {object} models.ErrorResponce
 // @Router /api/login [post]
 func (c *Controller) LoginUser(w http.ResponseWriter, r *http.Request) {
 	var user models.User
@@ -95,10 +101,10 @@ func (c *Controller) LoginUser(w http.ResponseWriter, r *http.Request) {
 // @Description Search city Name by coords
 // @Accept  json
 // @Produce  json
-// @Param  coordinates  body  RequestAddressSearch true  "Lattitude and Longitude"
+// @Param  coordinates  body  models.RequestAddressSearch true  "Lattitude and Longitude"
 // @Success 200 {object} string
-// @Failure 400 {object} errorResponce
-// @Failure 500 {object} errorResponce
+// @Failure 400 {object} models.ErrorResponce
+// @Failure 500 {object} models.ErrorResponce
 // @Router /api/address/search [post]
 func (c *Controller) SearchAnswer(w http.ResponseWriter, r *http.Request) {
 	var coordinates models.RequestAddressSearch
@@ -120,10 +126,10 @@ func (c *Controller) SearchAnswer(w http.ResponseWriter, r *http.Request) {
 // @Description Search coords by address
 // @Accept  json
 // @Produce  json
-// @Param  coordinates  body  Address true  "House number, road, suburb, city, state, country"
+// @Param  coordinates  body  models.Address true  "House number, road, suburb, city, state, country"
 // @Success 200 {object} string
-// @Failure 400 {object} errorResponce
-// @Failure 500 {object} errorResponce
+// @Failure 400 {object} models.ErrorResponce
+// @Failure 500 {object} models.ErrorResponce
 // @Router /api/address/search [post]
 func (c *Controller) GeocodeAnswer(w http.ResponseWriter, r *http.Request) {
 	var address models.Address
@@ -137,6 +143,29 @@ func (c *Controller) GeocodeAnswer(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(status)
 	w.Write([]byte("Your lattitude = " + coords[0].Lat + "; Your longitude = " + coords[0].Lon))
+}
+
+// GetUserByID handle GET-requests on api/users/{id}
+// @Summary Get username by ID
+// @Tags Login
+// @Description Search username by id
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} string
+// @Failure 400 {object} models.ErrorResponce
+// @Failure 500 {object} models.ErrorResponce
+// @Router /api/users/{id} [get]
+func (c *Controller) GetUserByID(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	user, err := c.Servicer.GetByID(id)
+
+	if err != nil {
+		newErrorResponce(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Username of user with ID " + id + " is " + user.Username))
 }
 
 func (c *Controller) NotFoundAnswer(w http.ResponseWriter, r *http.Request) {
