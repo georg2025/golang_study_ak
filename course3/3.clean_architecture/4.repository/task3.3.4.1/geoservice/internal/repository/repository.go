@@ -2,47 +2,173 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
-	service "geoservice/internal/service"
-	"log"
+	models "geoservice/models"
 	"os"
 
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/joho/godotenv"
 )
 
 type PostgressDataBase struct {
-	Pool *pgxpool.Pool
+	Base *sql.DB
 }
 
 type UserRepository interface {
-	Create(ctx context.Context, user service.User) error
-	GetByID(ctx context.Context, id string) (service.User, error)
-	Update(ctx context.Context, user service.User) error
+	Create(ctx context.Context, user models.User) error
+	GetByID(ctx context.Context, id string) (models.User, error)
+	GetByName(ctx context.Context, name string) (models.User, bool, error)
+	Update(ctx context.Context, user models.User) error
 	Delete(ctx context.Context, id string) error
-	List(ctx context.Context) ([]service.User, error)
+	List(ctx context.Context) ([]models.User, error)
 }
 
-func StartPostgressDataBase(ctx context.Context) {
-	pool, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
-	if err != nil {
-		log.Fatalf("Unable to connect to database: %v\n", err)
-	}
-	defer pool.Close()
+func StartPostgressDataBase(ctx context.Context) (*PostgressDataBase, error) {
+	err := godotenv.Load()
 
-	dataBase := NewPostgressDataBase(pool)
-	newTableString := `CREATE TABLE IF NOT EXISTS newtable (
+	if err != nil {
+		return nil, err
+	}
+
+	dataBase := &PostgressDataBase{}
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	connStr := "user=" + dbUser + " password=" + dbPassword + " dbname=" + dbName + " host=" + dbHost + " port=" + dbPort
+	db, err := sql.Open("postgress", connStr)
+	if err != nil {
+		return dataBase, err
+	}
+
+	dataBase.Base = db
+	err = dataBase.CreateNewUserTable()
+	return dataBase, err
+}
+
+func (db *PostgressDataBase) CreateNewUserTable() error {
+	newTableString := `CREATE TABLE IF NOT EXISTS users (
 		id SERIAL PRIMARY KEY,
 		username VARCHAR(100) NOT NULL UNIQUE,
 		password VARCHAR(32) NOT NULL,
-		isExist BOOLEAN NOT NULL
+		isExist BOOLEAN DEFAULT true
 	);`
-	dataBase.Pool.Exec(context.Background(), newTableString)
 
-	<-ctx.Done()
-	fmt.Println("we stop gracefuly")
+	_, err := db.Base.Exec(newTableString)
+	return err
 }
 
-func NewPostgressDataBase(pool *pgxpool.Pool) *PostgressDataBase {
-	dataBase := &PostgressDataBase{Pool: pool}
-	return dataBase
+func (db *PostgressDataBase) Create(ctx context.Context, user models.User) error {
+	query := `
+        INSERT INTO users (username, password, isExist)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (username) DO NOTHING;
+    `
+
+	result, err := db.Base.Exec(query, user.Username, user.Password, true)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("user with username %s already exists", user.Username)
+	}
+
+	return nil
+}
+
+func (db *PostgressDataBase) GetByID(ctx context.Context, id string) (models.User, error) {
+	var user models.User
+	query := `SELECT username, password FROM users WHERE id = $1`
+
+	row := db.Base.QueryRow(query, id)
+	err := row.Scan(&user.Username, &user.Password)
+
+	if err != nil {
+
+		if err == sql.ErrNoRows {
+			return user, fmt.Errorf("user with ID %s not found", id)
+		}
+
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (db *PostgressDataBase) Update(ctx context.Context, user models.User) error {
+	query := `UPDATE users SET isExist = $1 WHERE username = $2`
+
+	_, err := db.Base.Exec(query, true, user.Username)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *PostgressDataBase) Delete(ctx context.Context, id string) error {
+	query := `UPDATE users SET isExist = $1 WHERE id = $2`
+
+	_, err := db.Base.Exec(query, false, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *PostgressDataBase) List(ctx context.Context) ([]models.User, error) {
+	query := `SELECT username, password, isExist FROM users`
+	rows, err := db.Base.Query(query)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []models.User
+	for rows.Next() {
+		var user models.User
+		var isExist bool
+		err := rows.Scan(&user.Username, &user.Password, &isExist)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if isExist {
+			users = append(users, user)
+		}
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
+func (db *PostgressDataBase) GetByName(ctx context.Context, name string) (models.User, bool, error) {
+	query := `SELECT username, password, isExist FROM users WHERE username = $1`
+	var user models.User
+
+	var isExist bool
+	row := db.Base.QueryRow(query, name)
+	err := row.Scan(&user.Username, &user.Password, &isExist)
+
+	if err != nil {
+
+		if err == sql.ErrNoRows || !isExist {
+			return user, false, fmt.Errorf("user %s not found", name)
+		}
+	}
+
+	return user, isExist, err
 }

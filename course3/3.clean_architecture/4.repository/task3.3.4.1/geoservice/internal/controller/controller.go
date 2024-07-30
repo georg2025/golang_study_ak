@@ -17,7 +17,7 @@ type Controller struct {
 }
 
 func NewController(token *jwtauth.JWTAuth, options ...ControllerOption) *Controller {
-	service := service.NewGeoService(service.WithToken(token))
+	service, _ := service.NewGeoService(service.WithToken(token))
 	controller := &Controller{Servicer: service}
 	return controller
 }
@@ -49,7 +49,7 @@ func (c *Controller) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err, status := c.Servicer.RegisterUser(newUser)
+	status, err := c.Servicer.RegisterUser(newUser)
 	if err != nil {
 		newErrorResponce(w, err, status)
 		return
@@ -79,7 +79,7 @@ func (c *Controller) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err, status, tokenString := c.Servicer.LoginUser(user)
+	status, tokenString, err := c.Servicer.LoginUser(user)
 	if err != nil {
 		newErrorResponce(w, err, status)
 		return
@@ -104,7 +104,7 @@ func (c *Controller) SearchAnswer(w http.ResponseWriter, r *http.Request) {
 	var coordinates models.RequestAddressSearch
 	json.NewDecoder(r.Body).Decode(&coordinates)
 
-	err, status, address := c.Servicer.SearchAnswer(coordinates)
+	status, address, err := c.Servicer.SearchAnswer(coordinates)
 	if err != nil {
 		newErrorResponce(w, err, status)
 		return
@@ -129,7 +129,7 @@ func (c *Controller) GeocodeAnswer(w http.ResponseWriter, r *http.Request) {
 	var address models.Address
 	json.NewDecoder(r.Body).Decode(&address)
 
-	err, status, coords := c.Servicer.GeocodeAnswer(address)
+	status, coords, err := c.Servicer.GeocodeAnswer(address)
 	if err != nil {
 		newErrorResponce(w, err, status)
 		return

@@ -1,6 +1,7 @@
-package controller
+package service
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -10,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	repository "geoservice/internal/repository"
 	models "geoservice/models"
 
 	"github.com/go-chi/jwtauth"
@@ -19,8 +21,8 @@ import (
 type ServiceOption func(*GeoService)
 
 type GeoService struct {
-	Users map[string]string
-	Token *jwtauth.JWTAuth
+	Database repository.UserRepository
+	Token    *jwtauth.JWTAuth
 }
 
 func WithToken(token *jwtauth.JWTAuth) ServiceOption {
@@ -29,22 +31,27 @@ func WithToken(token *jwtauth.JWTAuth) ServiceOption {
 	}
 }
 
-func NewGeoService(options ...ServiceOption) *GeoService {
-	Users := make(map[string]string)
-	service := &GeoService{Users: Users}
+func NewGeoService(options ...ServiceOption) (*GeoService, error) {
+	dataBase, err := repository.StartPostgressDataBase(context.Background())
+
+	if err != nil {
+		return nil, err
+	}
+
+	service := &GeoService{Database: dataBase}
 
 	for _, option := range options {
 		option(service)
 	}
 
-	return service
+	return service, nil
 }
 
 type GeoServicer interface {
-	RegisterUser(user models.User) (error, int)
-	LoginUser(user models.User) (error, int, string)
-	SearchAnswer(coordinates models.RequestAddressSearch) (error, int, models.ResponseAddress)
-	GeocodeAnswer(address models.Address) (error, int, []models.GetCoords)
+	RegisterUser(user models.User) (int, error)
+	LoginUser(user models.User) (int, string, error)
+	SearchAnswer(coordinates models.RequestAddressSearch) (int, models.ResponseAddress, error)
+	GeocodeAnswer(address models.Address) (int, []models.GetCoords, error)
 }
 
 // registerUser handle POST-requests on api/register
@@ -58,14 +65,17 @@ type GeoServicer interface {
 // @Failure 400 {object} errorResponce
 // @Failure 500 {object} errorResponce
 // @Router /api/register [post]
-func (c *GeoService) RegisterUser(user models.User) (error, int) {
-	if _, ok := c.Users[user.Username]; ok {
-		return fmt.Errorf("username already exist"), http.StatusInternalServerError
+func (c *GeoService) RegisterUser(user models.User) (int, error) {
+	_, ok, _ := c.Database.GetByName(context.Background(), user.Username)
+
+	if ok {
+		return http.StatusInternalServerError, fmt.Errorf("username already exist")
 	}
 
 	passwordHash := hashPassword([]byte(user.Password))
-	c.Users[user.Username] = passwordHash
-	return nil, http.StatusCreated
+	user.Password = passwordHash
+	c.Database.Create(context.Background(), user)
+	return http.StatusCreated, nil
 }
 
 // loginUser handle POST-requests on api/login
@@ -79,14 +89,16 @@ func (c *GeoService) RegisterUser(user models.User) (error, int) {
 // @Failure 400 {object} errorResponce
 // @Failure 500 {object} errorResponce
 // @Router /api/login [post]
-func (c *GeoService) LoginUser(user models.User) (error, int, string) {
-	if _, ok := c.Users[user.Username]; !ok {
-		return fmt.Errorf("user dont exist"), http.StatusForbidden, ""
+func (c *GeoService) LoginUser(user models.User) (int, string, error) {
+	databaseUser, ok, _ := c.Database.GetByName(context.Background(), user.Username)
+
+	if !ok {
+		return http.StatusForbidden, "", fmt.Errorf("user dont exist")
 	}
 
 	passwordHash := hashPassword([]byte(user.Password))
-	if passwordHash != c.Users[user.Username] {
-		return fmt.Errorf("invalid password"), http.StatusForbidden, ""
+	if passwordHash != databaseUser.Password {
+		return http.StatusForbidden, "", fmt.Errorf("invalid password")
 	}
 
 	claims := jwt.MapClaims{
@@ -95,7 +107,7 @@ func (c *GeoService) LoginUser(user models.User) (error, int, string) {
 	}
 	_, tokenString, _ := c.Token.Encode(claims)
 
-	return nil, http.StatusOK, tokenString
+	return http.StatusOK, tokenString, nil
 }
 
 // searchAnswer handle POST-requests on api/address/search
@@ -109,27 +121,27 @@ func (c *GeoService) LoginUser(user models.User) (error, int, string) {
 // @Failure 400 {object} errorResponce
 // @Failure 500 {object} errorResponce
 // @Router /api/address/search [post]
-func (c *GeoService) SearchAnswer(coordinates models.RequestAddressSearch) (error, int, models.ResponseAddress) {
+func (c *GeoService) SearchAnswer(coordinates models.RequestAddressSearch) (int, models.ResponseAddress, error) {
 	var address models.ResponseAddress
 	url := fmt.Sprintf("https://nominatim.openstreetmap.org/reverse?format=json&lat=%f&lon=%f", coordinates.Lat, coordinates.Lng)
 	resp, err := http.Get(url)
 
 	if err != nil {
-		return err, http.StatusInternalServerError, address
+		return http.StatusInternalServerError, address, err
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return err, http.StatusInternalServerError, address
+		return http.StatusInternalServerError, address, err
 	}
 
 	err = json.Unmarshal(body, &address)
 	if err != nil {
-		return err, http.StatusInternalServerError, address
+		return http.StatusInternalServerError, address, err
 	}
 
-	return nil, http.StatusOK, address
+	return http.StatusOK, address, nil
 }
 
 // geocodeAnswer handle POST-requests on api/address/geocode
@@ -143,7 +155,7 @@ func (c *GeoService) SearchAnswer(coordinates models.RequestAddressSearch) (erro
 // @Failure 400 {object} errorResponce
 // @Failure 500 {object} errorResponce
 // @Router /api/address/search [post]
-func (c *GeoService) GeocodeAnswer(address models.Address) (error, int, []models.GetCoords) {
+func (c *GeoService) GeocodeAnswer(address models.Address) (int, []models.GetCoords, error) {
 	parts := []string{}
 	parts = append(parts, strings.Split(address.House_number, " ")...)
 	parts = append(parts, strings.Split(address.Road, " ")...)
@@ -165,20 +177,20 @@ func (c *GeoService) GeocodeAnswer(address models.Address) (error, int, []models
 
 	resp, err := http.Get(request)
 	if err != nil {
-		return err, http.StatusInternalServerError, coords
+		return http.StatusInternalServerError, coords, err
 	}
 
 	answer, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return err, http.StatusInternalServerError, coords
+		return http.StatusInternalServerError, coords, err
 	}
 
 	err = json.Unmarshal(answer, &coords)
 	if err != nil {
-		return err, http.StatusInternalServerError, coords
+		return http.StatusInternalServerError, coords, err
 	}
 
-	return nil, http.StatusOK, coords
+	return http.StatusOK, coords, nil
 }
 
 func hashPassword(password []byte) string {
