@@ -1,0 +1,134 @@
+basePath: /
+definitions:
+  main.Address:
+    properties:
+      city:
+        type: string
+      country:
+        type: string
+      house_number:
+        type: string
+      road:
+        type: string
+      state:
+        type: string
+      suburb:
+        type: string
+    type: object
+  main.RequestAddressSearch:
+    properties:
+      lat:
+        type: number
+      lng:
+        type: number
+    type: object
+  main.User:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  main.errorResponce:
+    properties:
+      message:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Simple GeoService.
+  title: GeoService
+  version: "1.0"
+paths:
+  /api/address/search:
+    post:
+      consumes:
+      - application/json
+      description: Search coords by address
+      parameters:
+      - description: House number, road, suburb, city, state, country
+        in: body
+        name: coordinates
+        required: true
+        schema:
+          $ref: '#/definitions/main.Address'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.errorResponce'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.errorResponce'
+      summary: SearchCoords
+      tags:
+      - Search
+  /api/login:
+    post:
+      consumes:
+      - application/json
+      description: Login user
+      parameters:
+      - description: username and password
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/main.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.errorResponce'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.errorResponce'
+      summary: Login
+      tags:
+      - Login
+  /api/register:
+    post:
+      consumes:
+      - application/json
+      description: Register user
+      parameters:
+      - description: username and password
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/main.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.errorResponce'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.errorResponce'
+      summary: Register
+      tags:
+      - Login
+swagger: "2.0"
