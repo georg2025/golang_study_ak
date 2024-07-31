@@ -58,11 +58,11 @@ type GoFakeitGenerator struct {
 type SQLiteGenerator struct {
 }
 
-func (user *User) TableName() string {
+func (u *User) TableName() string {
 	return "test"
 }
 
-func (generator *SQLiteGenerator) CreateTableSQL(table Tabler) string {
+func (g *SQLiteGenerator) CreateTableSQL(table Tabler) string {
 	name := table.TableName()
 
 	exec := fmt.Sprintf(`CREATE TABLE %s (
@@ -75,37 +75,37 @@ func (generator *SQLiteGenerator) CreateTableSQL(table Tabler) string {
 	return exec
 }
 
-func (generator *SQLiteGenerator) CreateInsertSQL(model Tabler) string {
+func (g *SQLiteGenerator) CreateInsertSQL(model Tabler) string {
 	exec := fmt.Sprintf("INSERT INTO %s (id, first_name, last_name, email) VALUES (?, ?, ?, ?)",
 		model.TableName())
 
 	return exec
 }
 
-func (generator *GoFakeitGenerator) GenerateFakeUser() User {
+func (g *GoFakeitGenerator) GenerateFakeUser() User {
 	user := User{}
-	generator.currentId++
-	user.ID = generator.currentId
+	g.currentId++
+	user.ID = g.currentId
 	user.FirstName = gofakeit.FirstName()
 	user.LastName = gofakeit.LastName()
 	user.Email = gofakeit.Email()
 	return user
 }
 
-func (generator *SQLiteGenerator) WriteData(db *sql.DB, data ...Tabler) error {
+func (g *SQLiteGenerator) WriteData(db *sql.DB, data ...Tabler) error {
 	if len(data) == 0 {
 		return nil
 	}
-	_, err := db.Exec(generator.CreateTableSQL(data[0].(*User)))
+	_, err := db.Exec(g.CreateTableSQL(data[0].(*User)))
 	if err != nil {
 		fmt.Println("error with table creation: ", err)
 	}
 
 	for _, user := range data {
-		_, err = db.Exec(generator.CreateInsertSQL(user.(*User)), user.(*User).ID,
+		_, err = db.Exec(g.CreateInsertSQL(user.(*User)), user.(*User).ID,
 			user.(*User).FirstName, user.(*User).LastName, user.(*User).Email)
 
-		fmt.Println(generator.CreateInsertSQL(user.(*User)))
+		fmt.Println(g.CreateInsertSQL(user.(*User)))
 
 		if err != nil {
 			return err
@@ -115,7 +115,7 @@ func (generator *SQLiteGenerator) WriteData(db *sql.DB, data ...Tabler) error {
 	return nil
 }
 
-func (generator *SQLiteGenerator) ReadData(db *sql.DB, tableName string) ([]Tabler, error) {
+func (g *SQLiteGenerator) ReadData(db *sql.DB, tableName string) ([]Tabler, error) {
 	users := []Tabler{}
 	selectData := fmt.Sprintf("SELECT * FROM %s", tableName)
 	rows, err := db.Query(selectData)
@@ -138,15 +138,15 @@ func (generator *SQLiteGenerator) ReadData(db *sql.DB, tableName string) ([]Tabl
 	return users, nil
 }
 
-func (migrator *Migrator) Migrate(db *sql.DB, data ...Tabler) error {
+func (m *Migrator) Migrate(db *sql.DB, data ...Tabler) error {
 	for _, user := range data {
-		users, err := migrator.sqlGenerator.(*SQLiteGenerator).ReadData(db, user.TableName())
+		users, err := m.sqlGenerator.(*SQLiteGenerator).ReadData(db, user.TableName())
 
 		if err != nil {
 			fmt.Println("error with taking data: ", err)
 		}
 
-		err = migrator.sqlGenerator.(*SQLiteGenerator).WriteData(migrator.db, users...)
+		err = m.sqlGenerator.(*SQLiteGenerator).WriteData(m.db, users...)
 
 		if err != nil {
 			fmt.Println("error with writing data: ", err)

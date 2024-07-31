@@ -29,16 +29,16 @@ func (b *Bitcoin) Pay(amount float64) error {
 	return nil
 }
 
-func (card *CreditCard) Pay(amount float64) error {
+func (c *CreditCard) Pay(amount float64) error {
 	if amount <= 0.0 {
 		return fmt.Errorf("error with pay ammount")
 	}
 
-	if card.balance < amount {
+	if c.balance < amount {
 		return fmt.Errorf("not enogh money")
 	}
 
-	card.balance -= amount
+	c.balance -= amount
 	return nil
 }
 

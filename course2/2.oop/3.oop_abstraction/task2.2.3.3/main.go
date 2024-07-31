@@ -7,9 +7,10 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+const tableNameUsers = "users"
+
 // Определение структуры пользователя
 type User struct {
-	tableName string
 	ID        int    `db_field:"id" db_type:"SERIAL PRIMARY KEY"`
 	FirstName string `db_field:"first_name" db_type:"VARCHAR(100)"`
 	LastName  string `db_field:"last_name" db_type:"VARCHAR(100)"`
@@ -37,11 +38,11 @@ type GoFakeitGenerator struct {
 type SQLiteGenerator struct {
 }
 
-func (user *User) TableName() string {
-	return user.tableName
+func (u *User) TableName() string {
+	return tableNameUsers
 }
 
-func (generator *SQLiteGenerator) CreateTableSQL(user *User) string {
+func (g *SQLiteGenerator) CreateTableSQL(user *User) string {
 	name := user.TableName()
 	if name == "" {
 		name = "test"
@@ -57,16 +58,16 @@ func (generator *SQLiteGenerator) CreateTableSQL(user *User) string {
 	return exec
 }
 
-func (generator *SQLiteGenerator) CreateInsertSQL(user *User) string {
+func (g *SQLiteGenerator) CreateInsertSQL(user *User) string {
 	exec := fmt.Sprintf("INSERT INTO %s (id, first_name, last_name, email) VALUES (?, ?, ?, ?)", user.TableName())
 
 	return exec
 }
 
-func (generator *GoFakeitGenerator) GenerateFakeUser() User {
+func (g *GoFakeitGenerator) GenerateFakeUser() User {
 	user := User{}
-	generator.currentId++
-	user.ID = generator.currentId
+	g.currentId++
+	user.ID = g.currentId
 	user.FirstName = gofakeit.FirstName()
 	user.LastName = gofakeit.LastName()
 	user.Email = gofakeit.Email()

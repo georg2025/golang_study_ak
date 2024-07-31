@@ -18,40 +18,40 @@ type Order interface {
 	GetOrderDetails() map[string]int
 }
 
-func (order *DineInOrder) AddItem(item string, quantity int) error {
-	order.orderDetails[item] += quantity
+func (o *DineInOrder) AddItem(item string, quantity int) error {
+	o.orderDetails[item] += quantity
 	return nil
 }
 
-func (order *TakeAwayOrder) AddItem(item string, quantity int) error {
-	order.orderDetails[item] += quantity
+func (o *TakeAwayOrder) AddItem(item string, quantity int) error {
+	o.orderDetails[item] += quantity
 	return nil
 }
 
-func (order *DineInOrder) RemoveItem(item string) error {
-	if order.orderDetails[item] < 1 {
+func (o *DineInOrder) RemoveItem(item string) error {
+	if o.orderDetails[item] < 1 {
 		return fmt.Errorf("not enough %s in order", item)
 	}
 
-	order.orderDetails[item]--
+	o.orderDetails[item]--
 	return nil
 }
 
-func (order *TakeAwayOrder) RemoveItem(item string) error {
-	if order.orderDetails[item] < 1 {
+func (o *TakeAwayOrder) RemoveItem(item string) error {
+	if o.orderDetails[item] < 1 {
 		return fmt.Errorf("not enough %s in order", item)
 	}
 
-	order.orderDetails[item]--
+	o.orderDetails[item]--
 	return nil
 }
 
-func (order *TakeAwayOrder) GetOrderDetails() map[string]int {
-	return order.orderDetails
+func (o *TakeAwayOrder) GetOrderDetails() map[string]int {
+	return o.orderDetails
 }
 
-func (order *DineInOrder) GetOrderDetails() map[string]int {
-	return order.orderDetails
+func (o *DineInOrder) GetOrderDetails() map[string]int {
+	return o.orderDetails
 }
 
 func ManageOrder(o Order) {

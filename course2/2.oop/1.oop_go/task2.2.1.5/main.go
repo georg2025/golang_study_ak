@@ -26,23 +26,23 @@ type Mover interface {
 
 // mostly we need to implement methods only on base struct.
 // Exept for Move func that differ for fast and slow movers
-func (mover FastMover) Move() string {
-	return fmt.Sprintf("Fast mover! Moving at speed: %d", mover.speed)
+func (m FastMover) Move() string {
+	return fmt.Sprintf("Fast mover! Moving at speed: %d", m.speed)
 }
 
-func (mover SlowMover) Move() string {
-	return fmt.Sprintf("Slow mover! Moving at speed: %d", mover.speed)
+func (m SlowMover) Move() string {
+	return fmt.Sprintf("Slow mover! Moving at speed: %d", m.speed)
 }
 
-func (mover BaseMover) Speed() int {
-	return mover.speed
+func (m BaseMover) Speed() int {
+	return m.speed
 }
 
-func (mover BaseMover) MaxSpeed() int {
+func (m BaseMover) MaxSpeed() int {
 	return 120
 }
 
-func (mover BaseMover) MinSpeed() int {
+func (m BaseMover) MinSpeed() int {
 	return 10
 }
 
