@@ -63,7 +63,6 @@ func TestRepoList(t *testing.T) {
 			}, nil, nil
 		},
 	}
-
 	adapter := GithubAdapter{RepoList: mockRepoService}
 	ctx := context.Background()
 	repos, err := adapter.GetRepos(ctx, "test")
@@ -108,7 +107,6 @@ func TestGistList(t *testing.T) {
 			}, nil, nil
 		},
 	}
-
 	adapter := GithubAdapter{GistList: mockGistService}
 	ctx := context.Background()
 	gists, err := adapter.GetGists(ctx, "test")
@@ -132,7 +130,6 @@ func TestGistRepoErrorOccur(t *testing.T) {
 			return nil, nil, fmt.Errorf("error here")
 		},
 	}
-
 	adapter := GithubAdapter{RepoList: mockRepoService}
 	ctx := context.Background()
 	_, err := adapter.GetRepos(ctx, "test")
