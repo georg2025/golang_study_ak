@@ -69,20 +69,20 @@ func TestRepoList(t *testing.T) {
 	ctx := context.Background()
 	repos, err := proxy.GetRepos(ctx, "test")
 
-	if len(proxy.cache) != 1 {
-		t.Errorf("wrong work with cache. Len should be 1, but it is: %d", len(proxy.cache))
-	}
-
 	if err != nil {
 		t.Errorf("expected no error, got error: %v", err)
 	}
 
+	if len(proxy.cache) != 1 {
+		t.Errorf("wrong work with cache. Len should be 1, but it is: %d", len(proxy.cache))
+	}
+
 	if len(repos) != 4 {
-		t.Fatalf("expected 2 gists, got %d", len(repos))
+		t.Errorf("expected 2 gists, got %d", len(repos))
 	}
 
 	if repos[0].Title != "1" || repos[1].Description != "Test Repo 2" {
-		t.Fatalf("unexpected gists: %+v", repos)
+		t.Errorf("unexpected gists: %+v", repos)
 	}
 }
 
@@ -119,20 +119,20 @@ func TestGistList(t *testing.T) {
 	ctx := context.Background()
 	gists, err := proxy.GetGists(ctx, "test")
 
-	if len(proxy.cache) != 1 {
-		t.Errorf("wrong work with cache. Len should be 1, but it is: %d", len(proxy.cache))
-	}
-
 	if err != nil {
 		t.Errorf("expected no error, got error: %v", err)
 	}
 
+	if len(proxy.cache) != 1 {
+		t.Errorf("wrong work with cache. Len should be 1, but it is: %d", len(proxy.cache))
+	}
+
 	if len(gists) != 4 {
-		t.Fatalf("expected 2 gists, got %d", len(gists))
+		t.Errorf("expected 2 gists, got %d", len(gists))
 	}
 
 	if gists[0].Description != "Test Gist 1" || gists[1].Description != "Test Gist 2" {
-		t.Fatalf("unexpected gists: %+v", gists)
+		t.Errorf("unexpected gists: %+v", gists)
 	}
 }
 

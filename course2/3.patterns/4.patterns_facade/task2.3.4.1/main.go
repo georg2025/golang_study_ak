@@ -71,9 +71,9 @@ type IndicatorEMA struct {
 	exmo          Exchanger
 }
 
-func (indicator *IndicatorSMA) GetData(period int, history CandlesHistory) ([]float64, error) {
-	indicator.candleHistory = history
-	return indicator.SMA(period), nil
+func (i *IndicatorSMA) GetData(period int, history CandlesHistory) ([]float64, error) {
+	i.candleHistory = history
+	return i.SMA(period), nil
 }
 
 func (t *IndicatorSMA) SMA(period int) []float64 {
@@ -86,16 +86,16 @@ func (t *IndicatorSMA) SMA(period int) []float64 {
 	return indicator.Sma(period, closing)
 }
 
-func (indicator *IndicatorEMA) GetData(period int, history CandlesHistory) ([]float64, error) {
-	indicator.candleHistory = history
-	return indicator.EMA(period), nil
+func (i *IndicatorEMA) GetData(period int, history CandlesHistory) ([]float64, error) {
+	i.candleHistory = history
+	return i.EMA(period), nil
 }
 
-func (t *IndicatorEMA) EMA(period int) []float64 {
+func (i *IndicatorEMA) EMA(period int) []float64 {
 	closing := []float64{}
 
-	for _, i := range t.candleHistory.Candles {
-		closing = append(closing, i.C)
+	for _, j := range i.candleHistory.Candles {
+		closing = append(closing, j.C)
 	}
 
 	return indicator.Ema(period, closing)
@@ -135,7 +135,6 @@ func (e *Exmo) GetCandlesHistory(pair string, limit int, start, end time.Time) (
 	}
 
 	history, err = UnmarshalCandles(body)
-
 	if err != nil {
 		return history, err
 	}
@@ -191,18 +190,16 @@ func NewDashboard(exchange Exchanger) *Dashboard {
 	return &Dashboard{exchange: exchange}
 }
 
-func (dashboard *Dashboard) WithCandlesHistory(period int, from, to time.Time) {
-
-	dashboard.period = period
-	dashboard.from = from
-	dashboard.to = to
-	dashboard.withCandlesHistory = true
-
+func (d *Dashboard) WithCandlesHistory(period int, from, to time.Time) {
+	d.period = period
+	d.from = from
+	d.to = to
+	d.withCandlesHistory = true
 }
 
-func (board *Dashboard) GetDashboard(pair string, opts ...IndicatorOpt) (DashboardData, error) {
-	data := DashboardData{Name: pair, from: board.from, to: board.to, Indicators: make(map[string][]IndicatorData)}
-	candlesHistory, err := board.exchange.GetCandlesHistory(pair, board.period, board.from, board.to)
+func (d *Dashboard) GetDashboard(pair string, opts ...IndicatorOpt) (DashboardData, error) {
+	data := DashboardData{Name: pair, from: d.from, to: d.to, Indicators: make(map[string][]IndicatorData)}
+	candlesHistory, err := d.exchange.GetCandlesHistory(pair, d.period, d.from, d.to)
 
 	if err != nil {
 		return data, err
