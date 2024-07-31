@@ -7,9 +7,6 @@ services:
       - "8080:8080"
     depends_on:
       - db
-    environment:
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/geoservicedb?sslmode=disable
-
   db:
     image: postgres:latest
     ports:
