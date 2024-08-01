@@ -9,8 +9,8 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o geoserver .
+RUN go build -o geoservice .
 
 EXPOSE 8080
 
-CMD ["./geoserver"]
+CMD ["./geoservice"]
