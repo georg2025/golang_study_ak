@@ -23,9 +23,9 @@ type Servicer interface {
 	GetAllBooks() ([]entities.Book, error)
 }
 
-func NewLibraryFacade() *LibraryFacade {
-	service := repository.NewLibraryService()
-	return &LibraryFacade{Service: service}
+func NewLibraryFacade() (*LibraryFacade, error) {
+	service, err := repository.NewLibraryService()
+	return &LibraryFacade{Service: service}, err
 }
 
 func (lf *LibraryFacade) StartProgram() error {
@@ -52,16 +52,15 @@ func (lf *LibraryFacade) StartProgram() error {
 		for i := 0; i < (100 - booksNumber); i++ {
 			rand.Seed(time.Now().UnixNano())
 			authorID := rand.Intn(authorsNumber) + 1
-			author, err := lf.Service.GetAuthorByID(authorID)
+
+			book := entities.Book{
+				Name:     gofakeit.BookTitle(),
+				AuthorID: authorID,
+			}
+			err = lf.Service.AddBook(book)
 			if err != nil {
 				return err
 			}
-
-			book := entities.Book{
-				Name:   gofakeit.BookTitle(),
-				Author: author,
-			}
-			lf.Service.AddBook(book)
 		}
 	}
 
@@ -70,8 +69,8 @@ func (lf *LibraryFacade) StartProgram() error {
 		return err
 	}
 
-	if usersNumber < 100 {
-		for i := 0; i < (100 - usersNumber); i++ {
+	if usersNumber < 50 {
+		for i := 0; i < (50 - usersNumber); i++ {
 			user := entities.User{
 				UserName: gofakeit.Name(),
 			}
@@ -138,7 +137,7 @@ func (lf *LibraryFacade) GetAllBooks() ([]entities.Book, error) {
 
 	books := []entities.Book{}
 	for i := 0; i <= booksQuantity; i++ {
-		book, err := lf.Service.GetBookInfo(i)
+		book, err := lf.Service.GetBookInfoByID(i)
 		if err != nil {
 			return nil, err
 		}
