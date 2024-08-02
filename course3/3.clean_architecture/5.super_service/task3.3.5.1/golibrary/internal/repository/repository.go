@@ -83,7 +83,7 @@ func (ls *LibraryService) CreateNewUserTable() error {
 func (ls *LibraryService) CreateNewBookTable() error {
 	newTableString := `CREATE TABLE IF NOT EXISTS books (
 		id SERIAL PRIMARY KEY,
-		name VARCHAR(100) NOT NULL UNIQUE,
+		name VARCHAR(100) NOT NULL,
 		authorid INTEGER NOT NULL,
 		usertakenid INTEGER DEFAULT 0,
 		istaken BOOL DEFAULT false
@@ -104,14 +104,20 @@ func (ls *LibraryService) CreateAuthorsTable() error {
 }
 
 func (ls *LibraryService) AddAuthor(authorName string) error {
+	tx, err := ls.Base.Begin()
+	if err != nil {
+		return err
+	}
+
 	query := `
 		INSERT INTO authors (name)
 		VALUES ($1)
 		ON CONFLICT (name) DO NOTHING;
 	`
 
-	result, err := ls.Base.Exec(query, authorName)
+	result, err := tx.Exec(query, authorName)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
@@ -124,7 +130,8 @@ func (ls *LibraryService) AddAuthor(authorName string) error {
 		return fmt.Errorf("user with username %s already exists", authorName)
 	}
 
-	return nil
+	err = tx.Commit()
+	return err
 }
 
 func (ls *LibraryService) AddBook(book entities.Book) error {
@@ -140,30 +147,44 @@ func (ls *LibraryService) AddBook(book entities.Book) error {
 		return fmt.Errorf("author with id %d doesnt exist", book.AuthorID)
 	}
 
+	tx, err := ls.Base.Begin()
+	if err != nil {
+		return err
+	}
+
 	query = `
 		INSERT INTO books (name, authorid)
 		VALUES ($1, $2)
 	`
 
-	_, err = ls.Base.Exec(query, book.Name, book.AuthorID)
+	_, err = tx.Exec(query, book.Name, book.AuthorID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Commit()
+	return err
+}
+
+func (ls *LibraryService) AddUser(user entities.User) error {
+	tx, err := ls.Base.Begin()
 	if err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func (ls *LibraryService) AddUser(user entities.User) error {
 	query := `
 		INSERT INTO users (username)
 		VALUES ($1)
 	`
 
-	_, err := ls.Base.Exec(query, user.UserName)
+	_, err = tx.Exec(query, user.UserName)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
+	tx.Commit()
 	return nil
 }
 
@@ -220,12 +241,12 @@ func (ls *LibraryService) ReturnBook(book entities.Book) error {
 }
 
 func (ls *LibraryService) GetBookInfoByID(id int) (entities.Book, error) {
-	query := `SELECT id, name, authorid, usertakenid, istaken FROM books WHERE id = $1`
+	query := `SELECT name, authorid, usertakenid, istaken FROM books WHERE id = $1`
 	row := ls.Base.QueryRow(query, id)
-	var book entities.Book
+	book := entities.Book{Id: id}
 	var isTaken bool
 	var takenBy int
-	err := row.Scan(&book.Id, &book.Name, &book.AuthorID, &takenBy, &isTaken)
+	err := row.Scan(&book.Name, &book.AuthorID, &takenBy, &isTaken)
 	if err != nil {
 		return book, err
 	}

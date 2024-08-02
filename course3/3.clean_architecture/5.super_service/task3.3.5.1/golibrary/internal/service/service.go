@@ -57,6 +57,7 @@ func (lf *LibraryFacade) StartProgram() error {
 				Name:     gofakeit.BookTitle(),
 				AuthorID: authorID,
 			}
+
 			err = lf.Service.AddBook(book)
 			if err != nil {
 				return err
@@ -136,7 +137,7 @@ func (lf *LibraryFacade) GetAllBooks() ([]entities.Book, error) {
 	}
 
 	books := []entities.Book{}
-	for i := 0; i <= booksQuantity; i++ {
+	for i := 1; i <= booksQuantity; i++ {
 		book, err := lf.Service.GetBookInfoByID(i)
 		if err != nil {
 			return nil, err

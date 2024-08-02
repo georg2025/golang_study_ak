@@ -27,7 +27,15 @@ type UserServicer interface {
 
 func StartUserService() (*UserService, error) {
 	service, err := service.NewLibraryFacade()
-	service.StartProgram()
+	if err != nil {
+		return nil, err
+	}
+
+	err = service.StartProgram()
+	if err != nil {
+		return nil, err
+	}
+
 	return &UserService{Service: service}, err
 }
 
