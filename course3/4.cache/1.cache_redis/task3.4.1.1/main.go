@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/go-redis/redis"
@@ -16,12 +17,26 @@ type cache struct {
 }
 
 func (c *cache) Set(key string, value interface{}) error {
+	user, ok := value.(*User)
+	if ok {
+		info, err := json.Marshal(user)
+		if err != nil {
+			return err
+		}
+
+		value = info
+	}
+
 	err := c.client.Set(key, value, 0).Err()
 	return err
 }
 
 func (c *cache) Get(key string) (interface{}, error) {
 	result, err := c.client.Get(key).Result()
+	if err == redis.Nil {
+		return nil, nil
+	}
+
 	return result, err
 }
 
@@ -32,9 +47,9 @@ func NewCache(client *redis.Client) Cacher {
 }
 
 type User struct {
-	ID   int
-	Name string
-	Age  int
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+	Age  int    `json:"age"`
 }
 
 func main() {
