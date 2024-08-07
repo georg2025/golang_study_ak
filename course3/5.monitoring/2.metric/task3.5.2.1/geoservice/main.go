@@ -17,6 +17,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/jwtauth"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // @title GeoService
@@ -88,6 +89,7 @@ func makeRouter() *chi.Mux {
 		r.Post("/api/address/geocode", responder.GeocodeAnswer)
 	})
 
+	r.Handle("/metrics", promhttp.Handler())
 	r.Get("/api/users/{id}", responder.GetUserByID)
 	r.Post("/api/register", responder.RegisterUser)
 	r.Post("/api/login", responder.LoginUser)
