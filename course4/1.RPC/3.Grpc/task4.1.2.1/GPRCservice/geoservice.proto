@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package main;
+
+option go_package = "/go;grpcservice";
+
+service GeoService {
+    rpc SearchAnswer(Request) returns (Responce) {}
+    rpc GeocodeAnswer(Request) returns (Responce) {}
+}
+
+message Request {
+    string info = 1;
+}
+
+message Responce {
+    string info = 1;
+}
+
