@@ -11,6 +11,7 @@ import (
 	models "geoservice/models"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type RPCFactory struct{}
@@ -56,7 +57,7 @@ func (f *JRPCFactory) MakeGeoProvider() (GeoProvider, error) {
 }
 
 func (f *GRPCFactory) MakeGeoProvider() (GeoProvider, error) {
-	client, err := grpc.NewClient("localhost:50051", grpc.WithInsecure())
+	client, err := grpc.NewClient("localhost:1234", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
