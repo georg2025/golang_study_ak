@@ -48,6 +48,13 @@ func NewController(token *jwtauth.JWTAuth, options ...ControllerOption) *Control
 		if err != nil {
 			fmt.Println(err)
 		}
+	} else if rpcMethod == "grpc" {
+		geoservicer := &service.GRPCFactory{}
+		provider, err = geoservicer.MakeGeoProvider()
+
+		if err != nil {
+			fmt.Println(err)
+		}
 	} else {
 		fmt.Println("Dont have any valid protocol to make rpc-service")
 	}
