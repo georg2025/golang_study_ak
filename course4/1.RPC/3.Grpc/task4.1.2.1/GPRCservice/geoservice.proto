@@ -5,15 +5,22 @@ package main;
 option go_package = "/go;grpcservice";
 
 service GeoService {
-    rpc SearchAnswer(Request) returns (Responce) {}
-    rpc GeocodeAnswer(Request) returns (Responce) {}
+    rpc SearchAnswer(SearchRequest) returns (SearchResponce) {}
+    rpc GeocodeAnswer(GeocodeRequest) returns (GeocodeResponce) {}
 }
 
-message Request {
+message SearchRequest {
     string info = 1;
 }
 
-message Responce {
+message SearchResponce {
     string info = 1;
 }
 
+message GeocodeRequest {
+    string info = 1;
+}
+
+message GeocodeResponce {
+    string info = 1;
+}

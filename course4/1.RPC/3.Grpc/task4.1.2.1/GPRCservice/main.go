@@ -8,10 +8,9 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"net/rpc/jsonrpc"
 	"strings"
 
-	pb "grpcservice/proto"
+	pb "grpcservice/go"
 
 	"google.golang.org/grpc"
 )
@@ -43,7 +42,8 @@ type GeoRPC struct {
 	pb.UnimplementedGeoServiceServer
 }
 
-func (g *GeoRPC) SearchAnswer(ctx context.Context, req *pb.Request) (*pb.Responce, error) {
+func (g *GeoRPC) SearchAnswer(ctx context.Context, req *pb.SearchRequest) (*pb.SearchResponce, error) {
+	log.Println("we got search request")
 	var coordinates RequestAddressSearch
 
 	err := json.Unmarshal([]byte(req.Info), &coordinates)
@@ -64,10 +64,11 @@ func (g *GeoRPC) SearchAnswer(ctx context.Context, req *pb.Request) (*pb.Responc
 		return nil, err
 	}
 
-	return &pb.Responce{Info: string(body)}, nil
+	return &pb.SearchResponce{Info: string(body)}, nil
 }
 
-func (g *GeoRPC) GeocodeAnswer(ctx context.Context, req *pb.Request) (*pb.Responce, error) {
+func (g *GeoRPC) GeocodeAnswer(ctx context.Context, req *pb.GeocodeRequest) (*pb.GeocodeResponce, error) {
+	log.Println("we got geocode request")
 	var address Address
 
 	err := json.Unmarshal([]byte(req.Info), &address)
@@ -103,11 +104,11 @@ func (g *GeoRPC) GeocodeAnswer(ctx context.Context, req *pb.Request) (*pb.Respon
 		return nil, err
 	}
 
-	return &pb.Responce{Info: string(answer)}, nil
+	return &pb.GeocodeResponce{Info: string(answer)}, nil
 }
 
 func main() {
-	listener, err := net.Listen("tcp", ":1234")
+	listener, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatal("Error with server starting", err)
 	}
@@ -117,12 +118,7 @@ func main() {
 
 	log.Println("Server is online")
 
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			log.Fatal("Error with connection accepting", err)
-		}
-
-		go jsonrpc.ServeConn(conn)
+	if err := server.Serve(listener); err != nil {
+		log.Fatalf("failed to start server: %v", err)
 	}
 }

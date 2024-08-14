@@ -11,7 +11,6 @@ import (
 	models "geoservice/models"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 type RPCFactory struct{}
@@ -29,7 +28,7 @@ type GeoServiceJSONRPC struct {
 }
 
 type GeoServiceGRPC struct {
-	Client *grpc.ClientConn
+	Client pb.GeoServiceClient
 }
 
 type GeoServiceFactory interface {
@@ -57,10 +56,12 @@ func (f *JRPCFactory) MakeGeoProvider() (GeoProvider, error) {
 }
 
 func (f *GRPCFactory) MakeGeoProvider() (GeoProvider, error) {
-	client, err := grpc.NewClient("localhost:1234", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
+
+	client := pb.NewGeoServiceClient(conn)
 
 	service := &GeoServiceGRPC{Client: client}
 	return service, nil
@@ -149,10 +150,9 @@ func (g *GeoServiceGRPC) SearchAnswer(coordinates models.RequestAddressSearch) (
 		return http.StatusInternalServerError, address, err
 	}
 
-	client := pb.NewGeoServiceClient(g.Client)
-	req := &pb.Request{Info: string(args)}
+	req := &pb.SearchRequest{Info: string(args)}
 
-	res, err := client.SearchAnswer(context.Background(), req)
+	res, err := g.Client.SearchAnswer(context.Background(), req)
 	if err != nil {
 		return http.StatusInternalServerError, address, err
 	}
@@ -171,10 +171,9 @@ func (g *GeoServiceGRPC) GeocodeAnswer(address models.Address) (int, []models.Ge
 		return http.StatusInternalServerError, nil, err
 	}
 
-	client := pb.NewGeoServiceClient(g.Client)
-	req := &pb.Request{Info: string(args)}
+	req := &pb.GeocodeRequest{Info: string(args)}
 
-	res, err := client.GeocodeAnswer(context.Background(), req)
+	res, err := g.Client.GeocodeAnswer(context.Background(), req)
 	if err != nil {
 		return http.StatusInternalServerError, nil, err
 	}

@@ -27,8 +27,8 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GeoServiceClient interface {
-	SearchAnswer(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Responce, error)
-	GeocodeAnswer(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Responce, error)
+	SearchAnswer(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*SearchResponce, error)
+	GeocodeAnswer(ctx context.Context, in *GeocodeRequest, opts ...grpc.CallOption) (*GeocodeResponce, error)
 }
 
 type geoServiceClient struct {
@@ -39,9 +39,9 @@ func NewGeoServiceClient(cc grpc.ClientConnInterface) GeoServiceClient {
 	return &geoServiceClient{cc}
 }
 
-func (c *geoServiceClient) SearchAnswer(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Responce, error) {
+func (c *geoServiceClient) SearchAnswer(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*SearchResponce, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Responce)
+	out := new(SearchResponce)
 	err := c.cc.Invoke(ctx, GeoService_SearchAnswer_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -49,9 +49,9 @@ func (c *geoServiceClient) SearchAnswer(ctx context.Context, in *Request, opts .
 	return out, nil
 }
 
-func (c *geoServiceClient) GeocodeAnswer(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Responce, error) {
+func (c *geoServiceClient) GeocodeAnswer(ctx context.Context, in *GeocodeRequest, opts ...grpc.CallOption) (*GeocodeResponce, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Responce)
+	out := new(GeocodeResponce)
 	err := c.cc.Invoke(ctx, GeoService_GeocodeAnswer_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -63,8 +63,8 @@ func (c *geoServiceClient) GeocodeAnswer(ctx context.Context, in *Request, opts 
 // All implementations must embed UnimplementedGeoServiceServer
 // for forward compatibility.
 type GeoServiceServer interface {
-	SearchAnswer(context.Context, *Request) (*Responce, error)
-	GeocodeAnswer(context.Context, *Request) (*Responce, error)
+	SearchAnswer(context.Context, *SearchRequest) (*SearchResponce, error)
+	GeocodeAnswer(context.Context, *GeocodeRequest) (*GeocodeResponce, error)
 	mustEmbedUnimplementedGeoServiceServer()
 }
 
@@ -75,10 +75,10 @@ type GeoServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedGeoServiceServer struct{}
 
-func (UnimplementedGeoServiceServer) SearchAnswer(context.Context, *Request) (*Responce, error) {
+func (UnimplementedGeoServiceServer) SearchAnswer(context.Context, *SearchRequest) (*SearchResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchAnswer not implemented")
 }
-func (UnimplementedGeoServiceServer) GeocodeAnswer(context.Context, *Request) (*Responce, error) {
+func (UnimplementedGeoServiceServer) GeocodeAnswer(context.Context, *GeocodeRequest) (*GeocodeResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GeocodeAnswer not implemented")
 }
 func (UnimplementedGeoServiceServer) mustEmbedUnimplementedGeoServiceServer() {}
@@ -103,7 +103,7 @@ func RegisterGeoServiceServer(s grpc.ServiceRegistrar, srv GeoServiceServer) {
 }
 
 func _GeoService_SearchAnswer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
+	in := new(SearchRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -115,13 +115,13 @@ func _GeoService_SearchAnswer_Handler(srv interface{}, ctx context.Context, dec 
 		FullMethod: GeoService_SearchAnswer_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GeoServiceServer).SearchAnswer(ctx, req.(*Request))
+		return srv.(GeoServiceServer).SearchAnswer(ctx, req.(*SearchRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _GeoService_GeocodeAnswer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
+	in := new(GeocodeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func _GeoService_GeocodeAnswer_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: GeoService_GeocodeAnswer_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GeoServiceServer).GeocodeAnswer(ctx, req.(*Request))
+		return srv.(GeoServiceServer).GeocodeAnswer(ctx, req.(*GeocodeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

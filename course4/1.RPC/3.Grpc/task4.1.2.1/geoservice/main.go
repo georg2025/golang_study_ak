@@ -51,7 +51,7 @@ func main() {
 	sig := <-sigChan
 	fmt.Printf("Recieved signal: %v. Starting shutting down\n", sig)
 
-	shuttingDownTime := 5 * time.Second
+	shuttingDownTime := 1 * time.Second
 	ctx, cancel := context.WithTimeout(context.Background(), shuttingDownTime)
 	defer cancel()
 
