@@ -42,16 +42,10 @@ type GeoRPC struct {
 	pb.UnimplementedGeoServiceServer
 }
 
-func (g *GeoRPC) SearchAnswer(ctx context.Context, req *pb.SearchRequest) (*pb.SearchResponce, error) {
+func (g *GeoRPC) SearchAnswer(ctx context.Context, req *pb.RequestAddress) (*pb.ResponceAddress, error) {
 	log.Println("we got search request")
-	var coordinates RequestAddressSearch
 
-	err := json.Unmarshal([]byte(req.Info), &coordinates)
-	if err != nil {
-		return nil, err
-	}
-
-	url := fmt.Sprintf("https://nominatim.openstreetmap.org/reverse?format=json&lat=%f&lon=%f", coordinates.Lat, coordinates.Lng)
+	url := fmt.Sprintf("https://nominatim.openstreetmap.org/reverse?format=json&lat=%f&lon=%f", req.Lat, req.Lng)
 	resp, err := http.Get(url)
 
 	if err != nil {
@@ -64,25 +58,34 @@ func (g *GeoRPC) SearchAnswer(ctx context.Context, req *pb.SearchRequest) (*pb.S
 		return nil, err
 	}
 
-	return &pb.SearchResponce{Info: string(body)}, nil
-}
+	var address ResponseAddress
 
-func (g *GeoRPC) GeocodeAnswer(ctx context.Context, req *pb.GeocodeRequest) (*pb.GeocodeResponce, error) {
-	log.Println("we got geocode request")
-	var address Address
-
-	err := json.Unmarshal([]byte(req.Info), &address)
+	err = json.Unmarshal(body, &address)
 	if err != nil {
 		return nil, err
 	}
 
+	return &pb.ResponceAddress{
+		Address: &pb.Address{
+			HouseNumber: address.Address.House_number,
+			Road:        address.Address.Road,
+			Suburb:      address.Address.Suburb,
+			City:        address.Address.City,
+			State:       address.Address.State,
+			Country:     address.Address.Country,
+		}}, nil
+}
+
+func (g *GeoRPC) GeocodeAnswer(ctx context.Context, req *pb.Address) (*pb.GetCoords, error) {
+	log.Println("we got geocode request")
+
 	parts := []string{}
-	parts = append(parts, strings.Split(address.House_number, " ")...)
-	parts = append(parts, strings.Split(address.Road, " ")...)
-	parts = append(parts, strings.Split(address.Suburb, " ")...)
-	parts = append(parts, strings.Split(address.City, " ")...)
-	parts = append(parts, strings.Split(address.State, " ")...)
-	parts = append(parts, strings.Split(address.Country, " ")...)
+	parts = append(parts, strings.Split(req.HouseNumber, " ")...)
+	parts = append(parts, strings.Split(req.Road, " ")...)
+	parts = append(parts, strings.Split(req.Suburb, " ")...)
+	parts = append(parts, strings.Split(req.City, " ")...)
+	parts = append(parts, strings.Split(req.State, " ")...)
+	parts = append(parts, strings.Split(req.Country, " ")...)
 
 	var sb strings.Builder
 	for _, i := range parts {
@@ -104,7 +107,24 @@ func (g *GeoRPC) GeocodeAnswer(ctx context.Context, req *pb.GeocodeRequest) (*pb
 		return nil, err
 	}
 
-	return &pb.GeocodeResponce{Info: string(answer)}, nil
+	var coords []GetCoords
+	err = json.Unmarshal(answer, &coords)
+	if err != nil {
+		return nil, err
+	}
+
+	var grpcRequest pb.GetCoords
+
+	for _, i := range coords {
+		coord := &pb.Coords{
+			Lat: i.Lat,
+			Lon: i.Lon,
+		}
+
+		grpcRequest.Coords = append(grpcRequest.Coords, coord)
+	}
+
+	return &grpcRequest, nil
 }
 
 func main() {

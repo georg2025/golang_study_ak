@@ -5,22 +5,33 @@ package main;
 option go_package = "/go;grpcservice";
 
 service GeoService {
-    rpc SearchAnswer(SearchRequest) returns (SearchResponce) {}
-    rpc GeocodeAnswer(GeocodeRequest) returns (GeocodeResponce) {}
+    rpc SearchAnswer(RequestAddress) returns (ResponceAddress) {}
+    rpc GeocodeAnswer(Address) returns (GetCoords) {}
 }
 
-message SearchRequest {
-    string info = 1;
+message RequestAddress {
+    double Lat = 1;
+    double Lng = 2;
 }
 
-message SearchResponce {
-    string info = 1;
+message Address {
+    string House_number = 1;
+    string Road = 2;
+    string Suburb = 3;
+    string City = 4;
+    string State = 5;
+    string Country = 6;
 }
 
-message GeocodeRequest {
-    string info = 1;
+message ResponceAddress {
+    Address address = 1;
 }
 
-message GeocodeResponce {
-    string info = 1;
+message Coords {
+    string Lat = 1;
+    string Lon = 2;
+}
+
+message GetCoords {
+    repeated Coords coords = 1;
 }
