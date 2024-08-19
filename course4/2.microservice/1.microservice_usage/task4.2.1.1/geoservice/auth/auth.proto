@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package main;
+
+option go_package = "/go;authservice";
+
+service AuthService {
+    rpc RegisterUser(User) returns (IsRegistered) {}
+    rpc LoginUser(User) returns (IsLogined) {}
+    rpc CheckToken(Token) returns (IsValid) {}
+}
+
+message IsValid {
+    bool isValid = 1;
+}
+
+message Token {
+    string token = 1;
+}
+
+message User {
+    string Login = 1;
+    string Password = 2;
+}
+
+message IsRegistered {
+    bool isRegistered = 1;
+}
+
+message IsLogined {
+    bool isLogined = 1;
+    Token token = 2;
+}

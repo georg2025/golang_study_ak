@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package main;
+
+option go_package = "/go;userservice";
+
+service UserService {
+    rpc GetByID(ID) returns (UserName) {}
+}
+
+message ID {
+    int32 Id = 1;
+}
+
+message UserName {
+    string Username = 1;
+}

@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package main;
+
+option go_package = "/go;proxyservice";
+
+service GeoService {
+    rpc SearchAnswer(RequestAddress) returns (ResponceAddress) {}
+    rpc GeocodeAnswer(Address) returns (GetCoords) {}
+}
+
+service UserService {
+    rpc GetByID(ID) returns (UserName) {}
+}
+
+service AuthService {
+    rpc RegisterUser(User) returns (IsRegistered) {}
+    rpc LoginUser(User) returns (IsLogined) {}
+    rpc CheckToken(Token) returns (IsValid) {}
+}
+
+message RequestAddress {
+    double Lat = 1;
+    double Lng = 2;
+}
+
+message Address {
+    string House_number = 1;
+    string Road = 2;
+    string Suburb = 3;
+    string City = 4;
+    string State = 5;
+    string Country = 6;
+}
+
+message ResponceAddress {
+    Address address = 1;
+}
+
+message Coords {
+    string Lat = 1;
+    string Lon = 2;
+}
+
+message GetCoords {
+    repeated Coords coords = 1;
+}
+
+message ID {
+    int32 Id = 1;
+}
+
+message UserName {
+    string Username = 1;
+}
+
+
+message IsValid {
+    bool isValid = 1;
+}
+
+message Token {
+    string token = 1;
+}
+
+message User {
+    string Login = 1;
+    string Password = 2;
+}
+
+message IsRegistered {
+    bool isRegistered = 1;
+}
+
+message IsLogined {
+    bool isLogined = 1;
+    Token token = 2;
+}
