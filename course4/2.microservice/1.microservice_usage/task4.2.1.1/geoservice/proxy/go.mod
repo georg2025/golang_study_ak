@@ -7,11 +7,9 @@ toolchain go1.22.6
 require (
 	github.com/go-chi/chi v1.5.5
 	github.com/go-chi/jwtauth v1.2.0
-	github.com/go-redis/redis v6.15.9+incompatible
-	github.com/golang-jwt/jwt v3.2.2+incompatible
-	github.com/joho/godotenv v1.5.1
-	github.com/lib/pq v1.10.9
 	github.com/prometheus/client_golang v1.18.0
+	google.golang.org/grpc v1.65.0
+	google.golang.org/protobuf v1.34.1
 )
 
 require (
@@ -23,8 +21,6 @@ require (
 	github.com/lestrrat-go/iter v1.0.0 // indirect
 	github.com/lestrrat-go/jwx v1.1.0 // indirect
 	github.com/lestrrat-go/option v1.0.0 // indirect
-	github.com/onsi/ginkgo v1.16.5 // indirect
-	github.com/onsi/gomega v1.34.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.48.0 // indirect
@@ -35,6 +31,4 @@ require (
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240528184218-531527333157 // indirect
-	google.golang.org/grpc v1.65.0 // indirect
-	google.golang.org/protobuf v1.34.1 // indirect
 )
