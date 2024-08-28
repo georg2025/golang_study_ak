@@ -6,10 +6,10 @@ import (
 	"net"
 	"strconv"
 
+	"google.golang.org/grpc"
+
 	pb "user/go"
 	repository "user/internal/repository"
-
-	"google.golang.org/grpc"
 )
 
 const serveAddress = ":50053"

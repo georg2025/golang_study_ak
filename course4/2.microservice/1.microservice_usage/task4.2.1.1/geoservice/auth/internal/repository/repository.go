@@ -1,7 +1,6 @@
 package repository
 
 import (
-	models "auth/models"
 	"context"
 	"database/sql"
 	"fmt"
@@ -9,6 +8,8 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+
+	models "auth/models"
 )
 
 type PostgressDataBase struct {

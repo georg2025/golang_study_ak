@@ -7,12 +7,12 @@ import (
 	"net"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
+	"google.golang.org/grpc"
+
 	pb "auth/go"
 	repository "auth/internal/repository"
 	models "auth/models"
-
-	"github.com/golang-jwt/jwt/v5"
-	"google.golang.org/grpc"
 )
 
 const serveAddress = ":50052"

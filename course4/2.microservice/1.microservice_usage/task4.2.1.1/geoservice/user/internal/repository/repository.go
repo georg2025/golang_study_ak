@@ -5,10 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	models "user/models"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+
+	models "user/models"
 )
 
 type PostgressDataBase struct {

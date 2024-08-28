@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"google.golang.org/grpc"
+
 	pb "geoservice/go"
 	models "geoservice/models"
-
-	"google.golang.org/grpc"
 )
 
 type GeoServiceGRPC struct {

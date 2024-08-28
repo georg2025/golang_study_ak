@@ -4,11 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	models "geoservice/models"
 	"os"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+
+	models "geoservice/models"
 )
 
 type PostgressDataBase struct {

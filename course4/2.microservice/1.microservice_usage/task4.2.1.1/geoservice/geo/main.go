@@ -10,9 +10,9 @@ import (
 	"net/http"
 	"strings"
 
-	pb "geo/go"
-
 	"google.golang.org/grpc"
+
+	pb "geo/go"
 )
 
 const serveAddress = ":50051"

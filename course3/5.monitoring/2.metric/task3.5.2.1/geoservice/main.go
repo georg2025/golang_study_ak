@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	controller "geoservice/internal/controller"
 	"geoservice/internal/metrics"
 	"log"
 	"net/http"
@@ -18,6 +17,8 @@ import (
 	"github.com/go-chi/jwtauth"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	controller "geoservice/internal/controller"
 )
 
 // @title GeoService

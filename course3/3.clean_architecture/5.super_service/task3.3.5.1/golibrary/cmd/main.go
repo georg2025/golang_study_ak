@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	controller "golibrary/internal/controller"
 	"log"
 	"net/http"
 	"os"
@@ -13,22 +13,24 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+
+	controller "golibrary/internal/controller"
 )
 
 const (
-	Address = "localhost:8080"
+	address = "localhost:8080"
 )
 
 func main() {
-	servicer, err := controller.StartUserService()
+	service, err := controller.StartUserService()
 	if err != nil {
 		fmt.Println(err)
-		log.Fatalf("Problems with starting servicer")
+		log.Fatalf("Problems with starting service")
 	}
 
-	r := StartChiRouter(servicer)
+	r := StartChiRouter(service)
 	server := &http.Server{
-		Addr:         Address,
+		Addr:         address,
 		Handler:      r,
 		ReadTimeout:  3 * time.Second,
 		WriteTimeout: 3 * time.Second,
@@ -36,7 +38,7 @@ func main() {
 
 	go func() {
 		log.Println("Starting server...")
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := server.ListenAndServe(); err != nil && errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("Server error: %v", err)
 		}
 	}()
