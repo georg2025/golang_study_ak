@@ -89,7 +89,9 @@ func handleConn(conn net.Conn) {
 	who := conn.RemoteAddr().String()
 	cli := client{conn, who, ch}
 	ch <- "You are " + who
-	messages <- who + " has arrived"
+	newCommer := who + " has arrived"
+	fmt.Println(newCommer)
+	messages <- newCommer
 	entering <- cli
 	input := bufio.NewScanner(conn)
 
@@ -97,7 +99,9 @@ func handleConn(conn net.Conn) {
 		messages <- (who + ": " + input.Text())
 	}
 
-	messages <- who + " has left"
+	hasLeft := who + " has left"
+	fmt.Println(hasLeft)
+	messages <- hasLeft
 	conn.Close()
 }
 
@@ -105,7 +109,6 @@ func handleConn(conn net.Conn) {
 func clientWriter(conn net.Conn, ch <-chan string) {
 	for message := range ch {
 		_, err := conn.Write([]byte(message))
-
 		if err != nil {
 			return
 		}
