@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	controller "geoservice/internal"
 	"log"
 	"net/http"
 	"os"
@@ -14,30 +13,29 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/jwtauth"
+
+	controller "golibrary/internal/controller"
 )
-
-// @title GeoService
-// @version 1.0
-// @description Simple GeoService.
-
-// @host localhost:8080
-// @BasePath /
 
 const (
-	adress = "localhost:8080"
+	address = "localhost:8080"
 )
 
-var tokenAuth *jwtauth.JWTAuth
-
 func main() {
-	r := makeRouter()
+	service, err := controller.StartUserService()
+	if err != nil {
+		fmt.Println(err)
+		log.Fatalf("Problems with starting service")
+	}
+
+	r := StartChiRouter(service)
 	server := &http.Server{
-		Addr:         adress,
+		Addr:         address,
 		Handler:      r,
 		ReadTimeout:  3 * time.Second,
 		WriteTimeout: 3 * time.Second,
 	}
+
 	go func() {
 		log.Println("Starting server...")
 		if err := server.ListenAndServe(); err != nil && errors.Is(err, http.ErrServerClosed) {
@@ -54,7 +52,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), shuttingDownTime)
 	defer cancel()
 
-	err := shutDown(ctx, server)
+	err = shutDown(ctx, server)
 	time.Sleep(shuttingDownTime)
 
 	if err == nil {
@@ -66,21 +64,15 @@ func shutDown(ctx context.Context, server *http.Server) error {
 	return server.Shutdown(ctx)
 }
 
-func makeRouter() *chi.Mux {
+func StartChiRouter(service controller.UserServicer) *chi.Mux {
 	r := chi.NewRouter()
-	tokenAuth = jwtauth.New("HS256", []byte("mysecretkey"), nil)
 	r.Use(middleware.Logger)
-	responder := controller.NewController(controller.WithToken(tokenAuth))
-
-	r.Group(func(r chi.Router) {
-		r.Use(jwtauth.Verifier(tokenAuth))
-		r.Use(jwtauth.Authenticator)
-		r.Post("/api/address/search", responder.SearchAnswer)
-		r.Post("/api/address/geocode", responder.GeocodeAnswer)
-	})
-
-	r.Post("/api/register", responder.RegisterUser)
-	r.Post("/api/login", responder.LoginUser)
-	r.NotFound(responder.NotFoundAnswer)
+	r.Get("/allusers", service.GetAllUsers)
+	r.Get("/allauthors", service.GetAllAuthors)
+	r.Get("/allbooks", service.GetAllBooks)
+	r.Post("/takebook/{id}", service.TakeBook)
+	r.Post("/returnbook/{id}", service.ReturnBook)
+	r.Post("/addbook", service.AddBook)
+	r.NotFound(service.NotFound)
 	return r
 }
