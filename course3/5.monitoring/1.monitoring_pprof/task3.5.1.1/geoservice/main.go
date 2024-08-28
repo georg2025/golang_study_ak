@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	controller "geoservice/internal/controller"
 	"log"
 	"net/http"
 	"net/http/pprof"
@@ -15,6 +14,8 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/jwtauth"
+
+	controller "geoservice/internal/controller"
 )
 
 // @title GeoService

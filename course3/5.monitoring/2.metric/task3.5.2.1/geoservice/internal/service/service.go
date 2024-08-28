@@ -11,12 +11,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-chi/jwtauth"
+	"github.com/golang-jwt/jwt"
+
 	cache "geoservice/internal/cache"
 	repository "geoservice/internal/repository"
 	models "geoservice/models"
-
-	"github.com/go-chi/jwtauth"
-	"github.com/golang-jwt/jwt"
 )
 
 type ServiceOption func(*GeoService)

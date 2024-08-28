@@ -3,12 +3,13 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	service "geoservice/internal/service"
-	models "geoservice/models"
 	"net/http"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
+
+	service "geoservice/internal/service"
+	models "geoservice/models"
 )
 
 type ControllerOption func(*Controller)
