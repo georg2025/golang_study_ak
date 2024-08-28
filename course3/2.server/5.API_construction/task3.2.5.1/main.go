@@ -35,7 +35,6 @@ func searchAnswer(w http.ResponseWriter, r *http.Request) {
 	url := fmt.Sprintf("https://nominatim.openstreetmap.org/reverse?format=json&lat=%f&lon=%f", coordinates.Lat, coordinates.Lng)
 
 	resp, err := http.Get(url)
-
 	if err != nil {
 		http.Error(w, "url error", http.StatusInternalServerError)
 		return
