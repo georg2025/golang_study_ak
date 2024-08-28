@@ -7,10 +7,10 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 
+	"google.golang.org/grpc"
+
 	pb "geoservice/internal/proto"
 	models "geoservice/models"
-
-	"google.golang.org/grpc"
 )
 
 type RPCFactory struct{}

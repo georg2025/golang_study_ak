@@ -2,10 +2,11 @@ package cache
 
 import (
 	"context"
-	repository "geoservice/internal/repository"
-	models "geoservice/models"
 
 	"github.com/go-redis/redis"
+
+	repository "geoservice/internal/repository"
+	models "geoservice/models"
 )
 
 type ProxyCache struct {

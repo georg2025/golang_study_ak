@@ -10,9 +10,9 @@ import (
 	"net/http"
 	"strings"
 
-	pb "grpcservice/go"
-
 	"google.golang.org/grpc"
+
+	pb "grpcservice/go"
 )
 
 type ResponseAddress struct {
