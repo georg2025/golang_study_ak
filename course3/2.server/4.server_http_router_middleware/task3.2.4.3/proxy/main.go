@@ -11,7 +11,6 @@ import (
 func main() {
 	target := "http://hugo:1313"
 	url, err := url.Parse(target)
-
 	if err != nil {
 		log.Fatalf("error with url parsing: %v", err)
 	}

@@ -15,7 +15,6 @@ func handleConnection(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	err := godotenv.Load()
-
 	if err != nil {
 		fmt.Println(err)
 		log.Fatalf("failed to load .env file")
